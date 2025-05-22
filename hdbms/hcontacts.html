@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us - WOWFOOD</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      color: #333;
+    }
+    .hero {
+      background-color: #5f5d5d;
+      padding: 60px 20px;
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://www.shutterstock.com/image-vector/school-canteen-interior-kitchen-vending-600nw-1829497718.jpg') no-repeat center center/cover;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      color: #ff0000;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 1rem;
+      color: #ddd;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: auto;
+      padding: 40px 0;
+    }
+    .contact-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: space-between;
+      width: 50%;
+    }
+    .contact-form form {
+      flex: 1 1 60%;
+    }
+    .contact-form input, .contact-form textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #999;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .contact-form button {
+      background-color: #ff0000;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .contact-form button:hover {
+      background-color: #cc0000;
+    }
+    .contact-details {
+      flex: 1 1 35%;
+    }
+    .contact-details h3 {
+      margin-top: 0;
+      color: #000;
+    }
+    .contact-details p {
+      margin: 5px 0;
+    }
+    .contact-details strong {
+      color: #ff0000;
+    }
+    footer {
+      background-color: #656363;
+      color: #eee;
+      padding: 40px 0;
+    }
+    .footer-content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .footer-column {
+      flex: 1 1 20%;
+      margin: 20px;
+    }
+    .footer-column h3 {
+      color: #fff;
+      border-bottom: 2px solid #ff0000;
+      padding-bottom: 10px;
+    }
+    .footer-links {
+      list-style: none;
+      padding: 0;
+    }
+    .footer-links li {
+      margin: 10px 0;
+    }
+    .footer-links a {
+      color: #ccc;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      color: #fff;
+    }
+    .social-links a {
+      margin-right: 10px;
+      color: #fff;
+      text-decoration: none;
+      background-color: #ff0000;
+      padding: 6px 10px;
+      border-radius: 50%;
+    }
+    .footer-bottom {
+      text-align: center;
+      margin-top: 30px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>Contact Us</h1>
+    <p>We'd love to hear from you. Reach out for support or suggestions!</p>
+    
+  </div>
+
+  <div class="container contact-form">
+    <form>
+      <input type="text" name="name" placeholder="Your Name" required />
+      <input type="email" name="email" placeholder="Your Email" required />
+      <input type="text" name="subject" placeholder="Subject" />
+      <textarea name="message" rows="6" placeholder="Your Message" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h3>WOWFOOD</h3>
+          <p>Your college canteen pre-ordering platform that makes campus dining convenient, quick, and satisfying.</p>
+          <div class="social-links">
+            <a href="#">FB</a>
+            <a href="#">TW</a>
+            <a href="#">IG</a>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Menu</a></li>
+            <li><a href="#">How It Works</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Contact Info</h3>
+          <p>Email: info@wowfood.com</p>
+          <p>Phone: +1 234 567 8900</p>
+          <p>Address: College Campus, Building 4, Floor 1</p>
+        </div>
+        <div class="footer-column">
+          <h3>Opening Hours</h3>
+          <p>Monday - Friday: 8:00 AM - 8:00 PM</p>
+          <p>Saturday: 9:00 AM - 5:00 PM</p>
+          <p>Sunday: Closed</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 WOWFOOD. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
