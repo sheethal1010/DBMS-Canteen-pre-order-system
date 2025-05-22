@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management - Canteen Pre-Order System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --secondary-color: #ff8c00; /* Changed from blue to orange */
+            --success-color: #1cc88a;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8f9fc;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #f09f3b 10%, #e67e00 100%);
+            color: white;
+            position: fixed;
+            width: 250px;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            overflow-x: hidden;
+            transition: 0.3s;
+        }
+        
+        .sidebar-brand {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand h2 {
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .sidebar-brand span {
+            color: var(--primary-color);
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: 0.35rem;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .user-info .badge {
+            margin-left: 10px;
+            background-color: var(--primary-color);
+        }
+        
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats-card {
+            border-left: 4px solid;
+            transition: transform 0.3s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-card.primary {
+            border-left-color: var(--primary-color);
+        }
+        
+        .stats-card.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .stats-card.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .stats-card.danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .stats-card .card-body {
+            padding: 20px;
+        }
+        
+        .stats-card .card-title {
+            text-transform: uppercase;
+            color: var(--dark-color);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card .card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+        
+        .stats-card i {
+            font-size: 2rem;
+            color: #dddfeb;
+        }
+        
+        .canteen-selector {
+            margin-bottom: 20px;
+        }
+        
+        .canteen-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .canteen-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.15);
+        }
+        
+        .canteen-card.selected {
+            border-color: var(--secondary-color);
+            background-color: rgba(255, 140, 0, 0.05);
+        }
+        
+        .canteen-card .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .canteen-card img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        
+        .canteen-card h5 {
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .canteen-card p {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+        
+        .canteen-code {
+            background-color: #f8f9fc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--dark-color);
+        }
+        
+        .canteen-code span {
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        
+        .order-table th, .order-table td {
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        .status-badge.pending {
+            background-color: #eaecf4;
+            color: var(--dark-color);
+        }
+        
+        .status-badge.preparing {
+            background-color: rgba(246, 194, 62, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .status-badge.ready {
+            background-color: rgba(28, 200, 138, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-badge.not-picked {
+            background-color: rgba(231, 74, 59, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .status-badge.cancelled {
+            background-color: rgba(90, 92, 105, 0.2);
+            color: var(--dark-color);
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+        
+        .inventory-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 0.1rem 0.5rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .inventory-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        
+        .inventory-item-info {
+            flex-grow: 1;
+        }
+        
+        .inventory-item-info h5 {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .inventory-item-info p {
+            margin-bottom: 0;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+        
+        .inventory-item .form-check {
+            margin-left: 15px;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .auth-modal .modal-header {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .auth-modal .modal-footer {
+            justify-content: center;
+        }
+        
+        .auth-code-input {
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.active {
+                width: 250px;
+                padding: 10px;
+            }
+            
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+        
+        /* Animation for new orders */
+        @keyframes newOrderPulse {
+            0% {
+                background-color: rgba(255, 107, 107, 0.1);
+            }
+            50% {
+                background-color: rgba(255, 107, 107, 0.3);
+            }
+            100% {
+                background-color: rgba(255, 107, 107, 0.1);
+            }
+        }
+        
+        .new-order {
+            animation: newOrderPulse 2s infinite;
+        }
+        
+        /* Tabs styling */
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            font-weight: 600;
+            border: none;
+            padding: 10px 20px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--secondary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            background-color: transparent;
+        }
+        
+        /* Toggle for mobile */
+        .toggle-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--dark-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        
+        /* Override Bootstrap's primary button color */
+        .btn-primary {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+        }
+        
+        .btn-outline-primary {
+            color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+        }
+        
+        .btn-outline-primary:hover, .btn-outline-primary.active {
+            background-color: var(--secondary-color) !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>Canteen<br><span>Pre-Order</span></h2>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="#"><i class="fas fa-utensils"></i> Orders</a>
+            <a href="#"><i class="fas fa-clipboard-list"></i> Inventory</a>
+            <a href="#"><i class="fas fa-history"></i> Order History</a>
+            <a href="#"><i class="fas fa-chart-bar"></i> Reports</a>
+            <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <button class="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="search-box">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search for orders...">
+                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="user-info">
+                <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Staff Photo">
+                <div>
+                    <h6 class="mb-0">John Doe</h6>
+                    <span class="badge" style="background-color: var(--secondary-color);">Kitchen Staff</span>
+                </div>
+                <div class="ms-3 position-relative">
+                    <i class="fas fa-bell fs-5"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats (Initially Hidden) -->
+        <div class="row mb-4" id="dashboardStats" style="display: none;">
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card primary">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Pending Orders</div>
+                                <div class="card-value" id="pendingOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card warning">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Preparing</div>
+                                <div class="card-value" id="preparingOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card success">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Ready for Pickup</div>
+                                <div class="card-value" id="readyOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card danger">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Cancelled</div>
+                                <div class="card-value" id="cancelledOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome Message -->
+        <div class="alert alert-info mb-4">
+            <h4><i class="fas fa-info-circle me-2"></i>Welcome to the Staff Portal</h4>
+            <p class="mb-0">Please select your canteen and authenticate to manage orders and inventory.</p>
+        </div>
+        
+        <!-- Canteen Selection -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Select Canteen</h5>
+            </div>
+            <div class="card-body">
+                <div class="row canteen-selector">
+                    <div class="col-lg-4 mb-3">
+                        <div class="card canteen-card" id="canteen1">
+                            <div class="card-body">
+                                <img src="https://img.icons8.com/color/96/000000/restaurant-building.png" alt="Big Mingoes">
+                                <h5>Big Mingoes</h5>
+                                <p>Main Campus Canteen</p>
+                                <div class="canteen-code">
+                                    Staff Code: <span>BM1234</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <div class="card canteen-card" id="canteen2">
+                            <div class="card-body">
+                                <img src="https://img.icons8.com/color/96/000000/cafe.png" alt="Small Mingoes">
+                                <h5>Small Mingoes</h5>
+                                <p>Science Building Canteen</p>
+                                <div class="canteen-code">
+                                    Staff Code: <span>SM5678</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <div class="card canteen-card" id="canteen3">
+                            <div class="card-body">
+                                <img src="https://img.icons8.com/color/96/000000/food-bar.png" alt="M M Foods">
+                                <h5>M M Foods</h5>
+                                <p>Engineering Block Canteen</p>
+                                <div class="canteen-code">
+                                    Staff Code: <span>MM9012</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#authModal">
+                        <i class="fas fa-key me-2"></i>Authenticate & Access Orders
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Management (Initially Hidden) -->
+        <div id="ordersManagement" style="display: none;">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0" id="canteenTitle">Big Mingoes - Orders Management</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                                Pending <span class="badge bg-secondary ms-2">12</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="preparing-tab" data-bs-toggle="tab" data-bs-target="#preparing" type="button" role="tab">
+                                Preparing <span class="badge bg-warning ms-2">5</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ready-tab" data-bs-toggle="tab" data-bs-target="#ready" type="button" role="tab">
+                                Ready for Pickup <span class="badge bg-success ms-2">7</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                                Completed/Cancelled <span class="badge bg-secondary ms-2">10</span>
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="orderTabsContent">
+                        <!-- Pending Orders Tab -->
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="new-order">
+                                            <td>#ORD-2023</td>
+                                            <td>Alice Johnson</td>
+                                            <td>
+                                                <div>1x Chicken Burger</div>
+                                                <div>1x French Fries</div>
+                                                <div>1x Coke</div>
+                                            </td>
+                                            <td>₹250</td>
+                                            <td>Just now</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2022</td>
+                                            <td>Bob Smith</td>
+                                            <td>
+                                                <div>2x Veg Sandwich</div>
+                                                <div>2x Mango Juice</div>
+                                            </td>
+                                            <td>₹180</td>
+                                            <td>5 mins ago</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2021</td>
+                                            <td>Charlie Brown</td>
+                                            <td>
+                                                <div>1x Masala Dosa</div>
+                                                <div>1x Filter Coffee</div>
+                                            </td>
+                                            <td>₹120</td>
+                                            <td>10 mins ago</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Preparing Orders Tab -->
+                        <div class="tab-pane fade" id="preparing" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Started</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2020</td>
+                                            <td>David Wilson</td>
+                                            <td>
+                                                <div>1x Paneer Tikka</div>
+                                                <div>2x Butter Naan</div>
+                                                <div>1x Lassi</div>
+                                            </td>
+                                            <td>₹350</td>
+                                            <td>15 mins ago</td>
+                                            <td><span class="status-badge preparing">Preparing</span></td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm action-btn">Mark Ready</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2019</td>
+                                            <td>Eva Martinez</td>
+                                            <td>
+                                                <div>1x Veg Biryani</div>
+                                                <div>1x Raita</div>
+                                            </td>
+                                            <td>₹180</td>
+                                            <td>20 mins ago</td>
+                                            <td><span class="status-badge preparing">Preparing</span></td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm action-btn">Mark Ready</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Ready for Pickup Tab -->
+                        <div class="tab-pane fade" id="ready" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Ready Since</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2018</td>
+                                            <td>Frank Thomas</td>
+                                            <td>
+                                                <div>1x Chicken Fried Rice</div>
+                                                <div>1x Manchurian</div>
+                                            </td>
+                                            <td>₹220</td>
+                                            <td>5 mins ago</td>
+                                            <td><span class="status-badge ready">Ready</span></td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm action-btn">Mark Picked Up</button>
+                                                <button class="btn btn-secondary btn-sm action-btn">Not Picked Up</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2017</td>
+                                            <td>Grace Lee</td>
+                                            <td>
+                                                <div>2x Samosa</div>
+                                                <div>1x Tea</div>
+                                            </td>
+                                            <td>₹80</td>
+                                            <td>15 mins ago</td>
+                                            <td><span class="status-badge ready">Ready</span></td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm action-btn">Mark Picked Up</button>
+                                                <button class="btn btn-secondary btn-sm action-btn">Not Picked Up</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Completed/Cancelled Tab -->
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2016</td>
+                                            <td>Henry Garcia</td>
+                                            <td>
+                                                <div>1x Veg Pulao</div>
+                                                <div>1x Sweet Lassi</div>
+                                            </td>
+                                            <td>₹150</td>
+                                            <td>1 hour ago</td>
+                                            <td><span class="status-badge not-picked">Not Picked Up</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2015</td>
+                                            <td>Ivy Robinson</td>
+                                            <td>
+                                                <div>1x Veg Burger</div>
+                                                <div>1x French Fries</div>
+                                            </td>
+                                            <td>₹180</td>
+                                            <td>2 hours ago</td>
+                                            <td><span class="status-badge cancelled">Cancelled</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Management -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Inventory Management</h5>
+                    <button class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add New Item
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search inventory items...">
+                                <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active">All</button>
+                                <button type="button" class="btn btn-outline-primary">Available</button>
+                                <button type="button" class="btn btn-outline-primary">Unavailable</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inventory-list">
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Burger" alt="Chicken Burger">
+                            <div class="inventory-item-info">
+                                <h5>Chicken Burger</h5>
+                                <p>Classic chicken patty with lettuce, tomato, and special sauce</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item1" checked>
+                                <label class="form-check-label" for="item1">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Sandwich" alt="Veg Sandwich">
+                            <div class="inventory-item-info">
+                                <h5>Veg Sandwich</h5>
+                                <p>Fresh vegetables with cheese and mayo</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item2" checked>
+                                <label class="form-check-label" for="item2">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Dosa" alt="Masala Dosa">
+                            <div class="inventory-item-info">
+                                <h5>Masala Dosa</h5>
+                                <p>South Indian crepe with spiced potato filling</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item3">
+                                <label class="form-check-label" for="item3">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Biryani" alt="Veg Biryani">
+                            <div class="inventory-item-info">
+                                <h5>Veg Biryani</h5>
+                                <p>Fragrant rice with mixed vegetables and spices</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item4" checked>
+                                <label class="form-check-label" for="item4">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Samosa" alt="Samosa">
+                            <div class="inventory-item-info">
+                                <h5>Samosa</h5>
+                                <p>Crispy pastry with spiced potato filling</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item5" checked>
+                                <label class="form-check-label" for="item5">Available</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content auth-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">Canteen Pre-Order System - Staff Authentication</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <img src="" alt="Canteen Logo" id="authCanteenLogo" width="80" height="80">
+                        <h4 class="mt-3" id="authCanteenName">Select a Canteen</h4>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="authCode" class="form-label">Enter Staff Authentication Code</label>
+                        <input type="password" class="form-control auth-code-input" id="authCode" maxlength="6" placeholder="******">
+                        <div class="invalid-feedback">
+                            Invalid authentication code. Please try again.
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> This code is provided to authorized staff members only. If you don't have a code, please contact your manager.
+                    </div>
+                    <div class="alert alert-warning" id="authWarning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <span id="authWarningText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="authSubmit">Authenticate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Canteen selection
+        const canteenCards = document.querySelectorAll('.canteen-card');
+        const authCanteenLogo = document.getElementById('authCanteenLogo');
+        const authCanteenName = document.getElementById('authCanteenName');
+        const authSubmit = document.getElementById('authSubmit');
+        const authCode = document.getElementById('authCode');
+        const ordersManagement = document.getElementById('ordersManagement');
+        const canteenTitle = document.getElementById('canteenTitle');
+        
+        // Canteen codes (in a real app, these would be verified server-side)
+        const canteenCodes = {
+            'canteen1': 'BM1234',
+            'canteen2': 'SM5678',
+            'canteen3': 'MM9012'
+        };
+        
+        let selectedCanteen = null;
+        
+        // Handle canteen selection
+        canteenCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove selected class from all cards
+                canteenCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                card.classList.add('selected');
+                
+                // Store selected canteen ID
+                selectedCanteen = card.id;
+                
+                // Update auth modal
+                const canteenName = card.querySelector('h5').textContent;
+                const canteenLogo = card.querySelector('img').src;
+                
+                authCanteenLogo.src = canteenLogo;
+                authCanteenName.textContent = canteenName;
+            });
+        });
+        
+        // Canteen-specific order data (in a real app, this would come from a database)
+        const canteenOrderData = {
+            'canteen1': { // Big Mingoes
+                pending: 8,
+                preparing: 3,
+                ready: 5,
+                cancelled: 1,
+                orders: {
+                    pending: [
+                        {id: '#ORD-2023', customer: 'Alice Johnson', items: ['1x Chicken Burger', '1x French Fries', '1x Coke'], total: '₹250', time: 'Just now'},
+                        {id: '#ORD-2022', customer: 'Bob Smith', items: ['2x Veg Sandwich', '2x Mango Juice'], total: '₹180', time: '5 mins ago'}
+                    ],
+                    preparing: [
+                        {id: '#ORD-2020', customer: 'David Wilson', items: ['1x Paneer Tikka', '2x Butter Naan', '1x Lassi'], total: '₹350', time: '15 mins ago'}
+                    ],
+                    ready: [
+                        {id: '#ORD-2018', customer: 'Frank Thomas', items: ['1x Chicken Fried Rice', '1x Manchurian'], total: '₹220', time: '5 mins ago'}
+                    ],
+                    completed: [
+                        {id: '#ORD-2016', customer: 'Henry Garcia', items: ['1x Veg Pulao', '1x Sweet Lassi'], total: '₹150', time: '1 hour ago', status: 'Not Picked Up'}
+                    ]
+                }
+            },
+            'canteen2': { // Small Mingoes
+                pending: 5,
+                preparing: 2,
+                ready: 3,
+                cancelled: 0,
+                orders: {
+                    pending: [
+                        {id: '#ORD-2021', customer: 'Charlie Brown', items: ['1x Masala Dosa', '1x Filter Coffee'], total: '₹120', time: '10 mins ago'}
+                    ],
+                    preparing: [
+                        {id: '#ORD-2019', customer: 'Eva Martinez', items: ['1x Veg Biryani', '1x Raita'], total: '₹180', time: '20 mins ago'}
+                    ],
+                    ready: [
+                        {id: '#ORD-2017', customer: 'Grace Lee', items: ['2x Samosa', '1x Tea'], total: '₹80', time: '15 mins ago'}
+                    ],
+                    completed: [
+                        {id: '#ORD-2015', customer: 'Ivy Robinson', items: ['1x Veg Burger', '1x French Fries'], total: '₹180', time: '2 hours ago', status: 'Cancelled'}
+                    ]
+                }
+            },
+            'canteen3': { // M M Foods
+                pending: 3,
+                preparing: 1,
+                ready: 2,
+                cancelled: 1,
+                orders: {
+                    pending: [
+                        {id: '#ORD-2024', customer: 'Jack Williams', items: ['1x Hakka Noodles', '1x Spring Rolls'], total: '₹200', time: '3 mins ago'}
+                    ],
+                    preparing: [
+                        {id: '#ORD-2025', customer: 'Karen Davis', items: ['1x Schezwan Rice', '1x Manchow Soup'], total: '₹220', time: '10 mins ago'}
+                    ],
+                    ready: [
+                        {id: '#ORD-2026', customer: 'Leo Martin', items: ['1x Chilli Paneer', '2x Garlic Naan'], total: '₹250', time: '8 mins ago'}
+                    ],
+                    completed: [
+                        {id: '#ORD-2027', customer: 'Mia Thompson', items: ['1x Veg Fried Rice', '1x Gobi Manchurian'], total: '₹190', time: '45 mins ago', status: 'Cancelled'}
+                    ]
+                }
+            }
+        };
+        
+        // Function to update order tables based on selected canteen
+        function updateOrderTables(canteenId) {
+            const data = canteenOrderData[canteenId];
+            if (!data) return;
+            
+            // Update dashboard stats
+            document.getElementById('pendingOrderCount').textContent = data.pending;
+            document.getElementById('preparingOrderCount').textContent = data.preparing;
+            document.getElementById('readyOrderCount').textContent = data.ready;
+            document.getElementById('cancelledOrderCount').textContent = data.cancelled;
+            
+            // Update tab badges
+            document.querySelector('#pending-tab .badge').textContent = data.pending;
+            document.querySelector('#preparing-tab .badge').textContent = data.preparing;
+            document.querySelector('#ready-tab .badge').textContent = data.ready;
+            document.querySelector('#completed-tab .badge').textContent = data.completed ? data.completed.length : 0;
+            
+            // Clear existing table rows
+            document.querySelector('#pending table tbody').innerHTML = '';
+            document.querySelector('#preparing table tbody').innerHTML = '';
+            document.querySelector('#ready table tbody').innerHTML = '';
+            document.querySelector('#completed table tbody').innerHTML = '';
+            
+            // Populate pending orders
+            const pendingTable = document.querySelector('#pending table tbody');
+            data.orders.pending.forEach(order => {
+                const row = document.createElement('tr');
+                if (order.time === 'Just now') row.classList.add('new-order');
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                    <td>${order.total}</td>
+                    <td>${order.time}</td>
+                    <td><span class="status-badge pending">Pending</span></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                        <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                    </td>
+                `;
+                pendingTable.appendChild(row);
+            });
+            
+            // Populate preparing orders
+            const preparingTable = document.querySelector('#preparing table tbody');
+            data.orders.preparing.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                    <td>${order.total}</td>
+                    <td>${order.time}</td>
+                    <td><span class="status-badge preparing">Preparing</span></td>
+                    <td>
+                        <button class="btn btn-success btn-sm action-btn">Mark Ready</button>
+                        <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                    </td>
+                `;
+                preparingTable.appendChild(row);
+            });
+            
+            // Populate ready orders
+            const readyTable = document.querySelector('#ready table tbody');
+            data.orders.ready.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                    <td>${order.total}</td>
+                    <td>${order.time}</td>
+                    <td><span class="status-badge ready">Ready</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm action-btn">Mark Picked Up</button>
+                        <button class="btn btn-secondary btn-sm action-btn">Not Picked Up</button>
+                    </td>
+                `;
+                readyTable.appendChild(row);
+            });
+            
+            // Populate completed/cancelled orders
+            const completedTable = document.querySelector('#completed table tbody');
+            if (data.orders.completed) {
+                data.orders.completed.forEach(order => {
+                    const statusClass = order.status === 'Cancelled' ? 'cancelled' : 'not-picked';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order.id}</td>
+                        <td>${order.customer}</td>
+                        <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                        <td>${order.total}</td>
+                        <td>${order.time}</td>
+                        <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                    `;
+                    completedTable.appendChild(row);
+                });
+            }
+        }
+        
+        // Handle authentication
+        authSubmit.addEventListener('click', () => {
+            const authWarning = document.getElementById('authWarning');
+            const authWarningText = document.getElementById('authWarningText');
+            
+            // Hide any previous warnings
+            authWarning.style.display = 'none';
+            
+            if (!selectedCanteen) {
+                authWarning.style.display = 'block';
+                authWarningText.textContent = 'Please select a canteen before authenticating.';
+                return;
+            }
+            
+            const enteredCode = authCode.value;
+            const correctCode = canteenCodes[selectedCanteen];
+            
+            if (enteredCode === correctCode) {
+                // Authentication successful
+                const modal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+                modal.hide();
+                
+                // Show dashboard stats and orders management section
+                document.getElementById('dashboardStats').style.display = 'flex';
+                ordersManagement.style.display = 'block';
+                
+                // Update canteen title
+                const canteenName = document.querySelector(`#${selectedCanteen} h5`).textContent;
+                canteenTitle.textContent = `${canteenName} - Orders Management`;
+                
+                // Update order tables with canteen-specific data
+                updateOrderTables(selectedCanteen);
+                
+                // Scroll to dashboard stats
+                document.getElementById('dashboardStats').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // Authentication failed
+                authCode.classList.add('is-invalid');
+                authWarning.style.display = 'block';
+                authWarningText.textContent = 'Invalid authentication code. Please try again or contact your manager.';
+                
+                setTimeout(() => {
+                    authCode.classList.remove('is-invalid');
+                }, 3000);
+            }
+        });
+        
+        // Clear validation on input
+        authCode.addEventListener('input', () => {
+            authCode.classList.remove('is-invalid');
+        });
+        
+        // Mobile sidebar toggle
+        const toggleSidebar = document.querySelector('.toggle-sidebar');
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        
+        toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            mainContent.classList.toggle('active');
+        });
+        
+        // Order status update buttons
+        document.addEventListener('click', function(e) {
+            // Start preparing button
+            if (e.target.classList.contains('btn-warning') && e.target.textContent.includes('Start Preparing')) {
+                const row = e.target.closest('tr');
+                const statusCell = row.querySelector('.status-badge');
+                statusCell.className = 'status-badge preparing';
+                statusCell.textContent = 'Preparing';
+                
+                // Move to preparing tab
+                const preparingTab = document.getElementById('preparing-tab');
+                preparingTab.click();
+                
+                // Update buttons
+                e.target.textContent = 'Mark Ready';
+                e.target.classList.remove('btn-warning');
+                e.target.classList.add('btn-success');
+            }
+            
+            // Mark ready button
+            else if (e.target.classList.contains('btn-success') && e.target.textContent.includes('Mark Ready')) {
+                const row = e.target.closest('tr');
+                const statusCell = row.querySelector('.status-badge');
+                statusCell.className = 'status-badge ready';
+                statusCell.textContent = 'Ready';
+                
+                // Move to ready tab
+                const readyTab = document.getElementById('ready-tab');
+                readyTab.click();
+                
+                // Update buttons
+                e.target.textContent = 'Mark Picked Up';
+                e.target.classList.remove('btn-success');
+                e.target.classList.add('btn-primary');
+                
+                const cancelBtn = row.querySelector('.btn-danger');
+                cancelBtn.textContent = 'Not Picked Up';
+                cancelBtn.classList.remove('btn-danger');
+                cancelBtn.classList.add('btn-secondary');
+            }
+            
+            // Mark picked up button
+            else if (e.target.classList.contains('btn-primary') && e.target.textContent.includes('Mark Picked Up')) {
+                const row = e.target.closest('tr');
+                
+                // Move to completed tab
+                const completedTab = document.getElementById('completed-tab');
+                completedTab.click();
+                
+                // Remove row from current tab and add to completed
+                const completedTable = document.querySelector('#completed table tbody');
+                const newRow = row.cloneNode(true);
+                
+                // Update status
+                const statusCell = newRow.querySelector('.status-badge');
+                statusCell.className = 'status-badge';
+                statusCell.textContent = 'Completed';
+                
+                // Remove action buttons
+                const actionCell = newRow.querySelector('td:last-child');
+                actionCell.remove();
+                
+                // Add to completed table
+                completedTable.prepend(newRow);
+                row.remove();
+            }
+            
+            // Not picked up button
+            else if (e.target.classList.contains('btn-secondary') && e.target.textContent.includes('Not Picked Up')) {
+                const row = e.target.closest('tr');
+                
+                // Move to completed tab
+                const completedTab = document.getElementById('completed-tab');
+                completedTab.click();
+                
+                // Remove row from current tab and add to completed
+                const completedTable = document.querySelector('#completed table tbody');
+                const newRow = row.cloneNode(true);
+                
+                // Update status
+                const statusCell = newRow.querySelector('.status-badge');
+                statusCell.className = 'status-badge not-picked';
+                statusCell.textContent = 'Not Picked Up';
+                
+                // Remove action buttons
+                const actionCell = newRow.querySelector('td:last-child');
+                actionCell.remove();
+                
+                // Add to completed table
+                completedTable.prepend(newRow);
+                row.remove();
+            }
+            
+            // Cancel button
+            else if (e.target.classList.contains('btn-danger') && e.target.textContent.includes('Cancel')) {
+                const row = e.target.closest('tr');
+                
+                // Move to completed tab
+                const completedTab = document.getElementById('completed-tab');
+                completedTab.click();
+                
+                // Remove row from current tab and add to completed
+                const completedTable = document.querySelector('#completed table tbody');
+                const newRow = row.cloneNode(true);
+                
+                // Update status
+                const statusCell = newRow.querySelector('.status-badge');
+                statusCell.className = 'status-badge cancelled';
+                statusCell.textContent = 'Cancelled';
+                
+                // Remove action buttons
+                const actionCell = newRow.querySelector('td:last-child');
+                actionCell.remove();
+                
+                // Add to completed table
+                completedTable.prepend(newRow);
+                row.remove();
+            }
+        });
+        
+        // Inventory toggle switches
+        const inventorySwitches = document.querySelectorAll('.inventory-item .form-check-input');
+        
+        inventorySwitches.forEach(switchEl => {
+            switchEl.addEventListener('change', function() {
+                const itemName = this.closest('.inventory-item').querySelector('h5').textContent;
+                const status = this.checked ? 'available' : 'unavailable';
+                
+                // In a real app, this would update the database
+                console.log(`${itemName} is now ${status}`);
+                
+                // Update label
+                const label = this.nextElementSibling;
+                label.textContent = this.checked ? 'Available' : 'Unavailable';
+            });
+        });
+    </script>
+</body>
+</html>

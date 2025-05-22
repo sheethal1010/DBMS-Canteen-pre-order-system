@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            display: none;
+        }
+        .success {
+            border-color: #4CAF50;
+            background-color: #e7f3e8;
+        }
+        .error {
+            border-color: #f44336;
+            background-color: #f9e7e7;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Registration Form</h1>
+    <p>Use this simple form to test the registration functionality directly.</p>
+    
+    <form id="testForm">
+        <div class="form-group">
+            <label for="fullName">Full Name:</label>
+            <input type="text" id="fullName" name="fullName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email (Optional if phone provided):</label>
+            <input type="email" id="email" name="email">
+        </div>
+        
+        <div class="form-group">
+            <label for="phone">Phone (Optional if email provided):</label>
+            <input type="tel" id="phone" name="phone">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="accountType">Account Type:</label>
+            <select id="accountType" name="accountType">
+                <option value="customer">Customer</option>
+                <option value="staff">Staff</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="staffCodeGroup" style="display: none;">
+            <label for="staffCode">Staff Code:</label>
+            <input type="text" id="staffCode" name="staffCode" value="1234">
+        </div>
+        
+        <button type="submit">Register</button>
+    </form>
+    
+    <div id="result" class="result"></div>
+    
+    <script>
+        // Show/hide staff code field based on account type
+        document.getElementById('accountType').addEventListener('change', function() {
+            const staffCodeGroup = document.getElementById('staffCodeGroup');
+            if (this.value === 'staff') {
+                staffCodeGroup.style.display = 'block';
+            } else {
+                staffCodeGroup.style.display = 'none';
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Processing...';
+            resultDiv.className = 'result';
+            resultDiv.style.display = 'block';
+            
+            // Create form data
+            const formData = new FormData(this);
+            
+            // Send to simple_register.php
+            fetch('hdbms/simple_register.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.text().then(text => {
+                    console.log('Raw response:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e);
+                        throw new Error('Invalid JSON response from server: ' + text);
+                    }
+                });
+            })
+            .then(data => {
+                console.log('Parsed data:', data);
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h3>Registration Successful!</h3>
+                        <p>User ID: ${data.user.id}</p>
+                        <p>Name: ${data.user.fullName}</p>
+                        <p>Email: ${data.user.email || 'Not provided'}</p>
+                        <p>Phone: ${data.user.phone || 'Not provided'}</p>
+                        <p>Account Type: ${data.user.accountType}</p>
+                    `;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3>Registration Failed</h3>
+                        <p>${data.message}</p>
+                    `;
+                    resultDiv.className = 'result error';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h3>Error</h3>
+                    <p>${error.message}</p>
+                `;
+                resultDiv.className = 'result error';
+            });
+        });
+    </script>
+</body>
+</html>

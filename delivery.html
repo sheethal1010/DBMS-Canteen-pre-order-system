@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Order Status - Campus Canteen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    :root {
+      --primary-color: #ff6b35;
+      --secondary-color: #f5be71;
+      --dark-color: #b26f18;
+      --light-color: #fbe2a9;
+      --success-color: #2ecc71;
+      --pending-color: #3498db;
+      --text-color: #333;
+      --light-text: #666;
+      --white: #fff;
+      --border-color: #ddd;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fbe2a9, #f5be71, #b26f18);
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--text-color);
+      animation: gradientScroll 15s ease infinite;
+      background-size: 400% 400%;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientScroll {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Shapes Animation */
+    .shapes-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      animation: float 15s infinite linear;
+      opacity: 0.8;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      background-image: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,107,53,0.2));
+    }
+
+    .shape-1 {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 10%;
+      animation-duration: 25s;
+      animation-delay: 0s;
+      background-color: rgba(255, 255, 255, 0.25);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .shape-2 {
+      width: 140px;
+      height: 140px;
+      top: 70%;
+      left: 80%;
+      animation-duration: 30s;
+      animation-delay: 1s;
+      border-radius: 30%;
+      background-color: rgba(255, 107, 53, 0.25);
+      border: 2px solid rgba(255, 107, 53, 0.4);
+    }
+
+    .shape-3 {
+      width: 80px;
+      height: 80px;
+      top: 30%;
+      left: 85%;
+      animation-duration: 20s;
+      animation-delay: 2s;
+      border-radius: 40%;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .shape-4 {
+      width: 180px;
+      height: 180px;
+      top: 80%;
+      left: 5%;
+      animation-duration: 35s;
+      animation-delay: 3s;
+      border-radius: 20%;
+      background-color: rgba(245, 190, 113, 0.25);
+      border: 2px solid rgba(245, 190, 113, 0.4);
+    }
+
+    .shape-5 {
+      width: 120px;
+      height: 120px;
+      top: 40%;
+      left: 50%;
+      animation-duration: 28s;
+      animation-delay: 4s;
+      border-radius: 35%;
+      background-color: rgba(255, 255, 255, 0.28);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 0.9;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      }
+      33% {
+        transform: translateY(-70px) rotate(120deg) scale(1.15);
+        opacity: 0.7;
+        box-shadow: 0 0 25px rgba(255, 107, 53, 0.4);
+      }
+      66% {
+        transform: translateY(70px) rotate(240deg) scale(0.85);
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(245, 190, 113, 0.5);
+      }
+      100% {
+        transform: translateY(0) rotate(360deg) scale(1);
+        opacity: 0.9;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .container {
+      max-width: 800px;
+      width: 90%;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.92);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 0 15px rgba(255, 107, 53, 0.1);
+      position: relative;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      z-index: 10;
+      animation: container-glow 8s infinite alternate;
+    }
+
+    @keyframes container-glow {
+      0% {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 0 15px rgba(255, 107, 53, 0.1);
+      }
+      50% {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 0 25px rgba(245, 190, 113, 0.3);
+      }
+      100% {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 0 20px rgba(178, 111, 24, 0.25);
+      }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header h1 {
+      color: var(--dark-color);
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn {
+      color: var(--dark-color);
+      text-decoration: none;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      color: var(--primary-color);
+      transform: translateX(-3px);
+    }
+
+    .order-info {
+      background-color: rgba(245, 245, 245, 0.7);
+      border-left: 3px solid var(--primary-color);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      margin-bottom: 10px;
+    }
+
+    .info-label {
+      font-size: 0.9rem;
+      color: var(--light-text);
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .status-tracker {
+      margin: 40px 0;
+      position: relative;
+    }
+
+    .status-line {
+      position: absolute;
+      top: 24px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: var(--border-color);
+      z-index: 1;
+    }
+
+    .status-progress {
+      position: absolute;
+      top: 24px;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      z-index: 2;
+      transition: width 1s ease-in-out;
+    }
+
+    .status-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 3;
+    }
+
+    .status-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 20%;
+      text-align: center;
+    }
+
+    .step-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--white);
+      border: 3px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      color: var(--light-text);
+      position: relative;
+      transition: all 0.5s ease;
+    }
+
+    .step-icon.active {
+      border-color: var(--primary-color);
+      background-color: var(--white);
+      color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+    }
+
+    .step-icon.completed {
+      border-color: var(--success-color);
+      background-color: var(--success-color);
+      color: var(--white);
+    }
+
+    .step-label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--light-text);
+      transition: all 0.3s ease;
+    }
+
+    .step-label.active {
+      color: var(--primary-color);
+    }
+
+    .step-label.completed {
+      color: var(--success-color);
+    }
+
+    .step-time {
+      font-size: 0.8rem;
+      color: var(--light-text);
+    }
+
+    .order-details {
+      margin-top: 40px;
+      background-color: rgba(245, 245, 245, 0.5);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--border-color);
+    }
+
+    .details-title {
+      font-size: 1.2rem;
+      color: var(--dark-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-list {
+      margin-bottom: 20px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .item:last-child {
+      border-bottom: none;
+    }
+
+    .item-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-quantity {
+      background-color: var(--primary-color);
+      color: var(--white);
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .item-price {
+      font-weight: bold;
+    }
+
+    .total-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .total-label {
+      color: var(--light-text);
+    }
+
+    .total-value {
+      font-weight: bold;
+    }
+
+    .grand-total {
+      font-size: 1.2rem;
+      color: var(--dark-color);
+      font-weight: bold;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      color: var(--white);
+      box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: var(--white);
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 107, 53, 0.05);
+    }
+
+    .estimated-time {
+      text-align: center;
+      margin: 30px 0;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .estimated-time h3 {
+      color: var(--dark-color);
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+
+    .time-display {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .time-label {
+      font-size: 0.9rem;
+      color: var(--light-text);
+      margin-top: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        margin: 30px auto;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .status-step {
+        width: 20%;
+      }
+
+      .step-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+
+      .step-label {
+        font-size: 0.8rem;
+      }
+
+      .step-time {
+        font-size: 0.7rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 15px;
+        margin: 20px auto;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .back-btn {
+        margin-bottom: 10px;
+      }
+
+      .order-info-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .status-steps {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+
+      .status-step {
+        width: 100%;
+        flex-direction: row;
+        text-align: left;
+        gap: 15px;
+      }
+
+      .status-line, .status-progress {
+        top: 0;
+        left: 25px;
+        width: 4px;
+        height: 100%;
+      }
+
+      .step-icon {
+        margin-bottom: 0;
+      }
+
+      .step-info {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+
+    /* Animation for active step */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .step-icon.active {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <!-- Shapes Animation -->
+  <div class="shapes-container">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+    <div class="shape shape-5"></div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <a href="Main.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Menu
+      </a>
+      <h1><i class="fas fa-truck"></i> Order Status</h1>
+    </div>
+
+    <div class="order-info">
+      <div class="order-info-grid">
+        <div class="info-item">
+          <div class="info-label">Order Number</div>
+          <div class="info-value" id="order-number">#12345</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Order Date</div>
+          <div class="info-value" id="order-date">Oct 15, 2023</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Pickup Time</div>
+          <div class="info-value" id="pickup-time">12:30 PM</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Payment Method</div>
+          <div class="info-value" id="payment-method">Credit Card</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-tracker">
+      <div class="status-line"></div>
+      <div class="status-progress" id="status-progress"></div>
+      <div class="status-steps">
+        <div class="status-step">
+          <div class="step-icon completed" id="step-1">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="step-info">
+            <div class="step-label completed">Order Placed</div>
+            <div class="step-time" id="time-1">10:15 AM</div>
+          </div>
+        </div>
+        <div class="status-step">
+          <div class="step-icon completed" id="step-2">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="step-info">
+            <div class="step-label completed">Order Confirmed</div>
+            <div class="step-time" id="time-2">10:18 AM</div>
+          </div>
+        </div>
+        <div class="status-step">
+          <div class="step-icon active" id="step-3">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <div class="step-info">
+            <div class="step-label active">Preparing Food</div>
+            <div class="step-time" id="time-3">10:20 AM</div>
+          </div>
+        </div>
+        <div class="status-step">
+          <div class="step-icon" id="step-4">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="step-info">
+            <div class="step-label">Ready for Pickup</div>
+            <div class="step-time" id="time-4">--:--</div>
+          </div>
+        </div>
+        <div class="status-step">
+          <div class="step-icon" id="step-5">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="step-info">
+            <div class="step-label">Completed</div>
+            <div class="step-time" id="time-5">--:--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="estimated-time">
+      <h3><i class="far fa-clock"></i> Estimated Ready Time</h3>
+      <div class="time-display" id="estimated-time">12:30 PM</div>
+      <div class="time-label">Your order will be ready in approximately <span id="minutes-remaining">15</span> minutes</div>
+    </div>
+
+    <div class="order-details">
+      <div class="details-header">
+        <div class="details-title">
+          <i class="fas fa-receipt"></i> Order Details
+        </div>
+      </div>
+      <div class="item-list" id="item-list">
+        <div class="item">
+          <div class="item-name">
+            <div class="item-quantity">2</div>
+            <div>Veg Burger</div>
+          </div>
+          <div class="item-price">₹180</div>
+        </div>
+        <div class="item">
+          <div class="item-name">
+            <div class="item-quantity">1</div>
+            <div>French Fries</div>
+          </div>
+          <div class="item-price">₹90</div>
+        </div>
+        <div class="item">
+          <div class="item-name">
+            <div class="item-quantity">2</div>
+            <div>Cold Coffee</div>
+          </div>
+          <div class="item-price">₹160</div>
+        </div>
+      </div>
+      <div class="total-section">
+        <div class="total-row">
+          <div class="total-label">Subtotal</div>
+          <div class="total-value">₹430</div>
+        </div>
+        <div class="total-row">
+          <div class="total-label">GST (5%)</div>
+          <div class="total-value">₹21.50</div>
+        </div>
+        <div class="total-row grand-total">
+          <div class="total-label">Total</div>
+          <div class="total-value">₹451.50</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-secondary" id="cancel-btn">
+        <i class="fas fa-times"></i> Cancel Order
+      </button>
+      <button class="btn btn-primary" id="support-btn">
+        <i class="fas fa-headset"></i> Contact Support
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set current date and time
+      const now = new Date();
+      const orderDate = document.getElementById('order-date');
+      orderDate.textContent = now.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+
+      // Get order info from localStorage if available
+      // First check for tracking info, then fall back to current order info
+      const trackingInfoString = localStorage.getItem('trackingOrderInfo');
+      const currentOrderInfoString = localStorage.getItem('currentOrderInfo');
+      const orderInfoString = trackingInfoString || currentOrderInfoString;
+      
+      if (orderInfoString) {
+        const orderInfo = JSON.parse(orderInfoString);
+        
+        // Check if the order is cancelled
+        if (orderInfo.status === 'cancelled') {
+          // Show cancelled order message
+          document.querySelector('.container').innerHTML = `
+            <div class="header">
+              <h1><i class="fas fa-truck"></i> Order Status</h1>
+              <a href="Main.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Menu</a>
+            </div>
+            <div class="cancelled-order-message" style="text-align: center; padding: 50px 20px;">
+              <i class="fas fa-times-circle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 20px;"></i>
+              <h2 style="margin-bottom: 15px; color: #b26f18;">Order Cancelled</h2>
+              <p style="margin-bottom: 10px; color: #666;">Your order #${orderInfo.orderNumber} has been cancelled.</p>
+              <p style="margin-bottom: 30px; color: #666;">Cancelled on: ${new Date(orderInfo.cancelledAt).toLocaleString()}</p>
+              <a href="Main.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+                <i class="fas fa-utensils"></i> Place a New Order
+              </a>
+            </div>
+          `;
+          
+          // Hide the status tracker and other elements
+          document.querySelector('.status-tracker').style.display = 'none';
+          document.querySelector('.order-info').style.display = 'none';
+          document.querySelector('.order-details').style.display = 'none';
+          document.querySelector('.estimated-time').style.display = 'none';
+          document.querySelector('.action-buttons').style.display = 'none';
+          
+          // Return early
+          return;
+        }
+        
+        // Update order details
+        document.getElementById('order-number').textContent = '#' + orderInfo.orderNumber;
+        document.getElementById('pickup-time').textContent = orderInfo.pickupTime;
+        document.getElementById('estimated-time').textContent = orderInfo.pickupTime;
+        
+        // Set payment method if available
+        if (orderInfo.paymentMethod) {
+          let paymentMethodText = 'Cash on Delivery';
+          if (orderInfo.paymentMethod === 'upi') {
+            paymentMethodText = 'UPI';
+          } else if (orderInfo.paymentMethod === 'card') {
+            paymentMethodText = 'Credit/Debit Card';
+          }
+          document.getElementById('payment-method').textContent = paymentMethodText;
+        }
+        
+        // Calculate minutes remaining
+        const pickupTimeParts = orderInfo.pickupTime.match(/(\d+):(\d+)\s+(AM|PM)/);
+        if (pickupTimeParts) {
+          let hours = parseInt(pickupTimeParts[1]);
+          const minutes = parseInt(pickupTimeParts[2]);
+          const ampm = pickupTimeParts[3];
+          
+          if (ampm === 'PM' && hours < 12) hours += 12;
+          if (ampm === 'AM' && hours === 12) hours = 0;
+          
+          const pickupTime = new Date();
+          pickupTime.setHours(hours, minutes, 0);
+          
+          const diffMs = pickupTime - now;
+          const diffMins = Math.round(diffMs / 60000);
+          
+          if (diffMins > 0) {
+            document.getElementById('minutes-remaining').textContent = diffMins;
+          } else {
+            document.getElementById('minutes-remaining').textContent = 'less than 1';
+          }
+        }
+        
+        // Update order items
+        const itemList = document.getElementById('item-list');
+        itemList.innerHTML = '';
+        
+        let subtotal = 0;
+        
+        orderInfo.items.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          subtotal += itemTotal;
+          
+          const itemElement = document.createElement('div');
+          itemElement.className = 'item';
+          itemElement.innerHTML = `
+            <div class="item-name">
+              <div class="item-quantity">${item.quantity}</div>
+              <div>${item.name}</div>
+            </div>
+            <div class="item-price">₹${itemTotal}</div>
+          `;
+          
+          itemList.appendChild(itemElement);
+        });
+        
+        // Update totals
+        const gst = subtotal * 0.05;
+        const total = subtotal + gst;
+        
+        document.querySelector('.total-section').innerHTML = `
+          <div class="total-row">
+            <div class="total-label">Subtotal</div>
+            <div class="total-value">₹${subtotal.toFixed(2)}</div>
+          </div>
+          <div class="total-row">
+            <div class="total-label">GST (5%)</div>
+            <div class="total-value">₹${gst.toFixed(2)}</div>
+          </div>
+          <div class="total-row grand-total">
+            <div class="total-label">Total</div>
+            <div class="total-value">₹${total.toFixed(2)}</div>
+          </div>
+        `;
+      } else {
+        // If no order info is found, show a message instead of redirecting
+        document.querySelector('.container').innerHTML = `
+          <div class="header">
+            <h1><i class="fas fa-truck"></i> Order Status</h1>
+            <a href="Main.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Menu</a>
+          </div>
+          <div class="no-order-message" style="text-align: center; padding: 50px 20px;">
+            <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #ff6b35; margin-bottom: 20px;"></i>
+            <h2 style="margin-bottom: 15px; color: #b26f18;">No Active Order Found</h2>
+            <p style="margin-bottom: 30px; color: #666;">You don't have any active orders to track at the moment.</p>
+            <a href="Main.html" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+              <i class="fas fa-utensils"></i> Order Food Now
+            </a>
+          </div>
+        `;
+        
+        // Hide the status tracker and other elements since there's no order
+        document.querySelector('.status-tracker').style.display = 'none';
+        document.querySelector('.order-info').style.display = 'none';
+        document.querySelector('.order-details').style.display = 'none';
+        document.querySelector('.estimated-time').style.display = 'none';
+        document.querySelector('.action-buttons').style.display = 'none';
+        
+        // Return early since we don't need to set up the status tracker
+        return;
+      }
+
+      // Set up the status tracker
+      updateOrderStatus(3); // Default to "Preparing Food" stage
+      
+      // Simulate order progress (for demo purposes)
+      setTimeout(() => {
+        updateOrderStatus(4); // Move to "Ready for Pickup"
+      }, 10000);
+      
+      // Cancel order button
+      document.getElementById('cancel-btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to cancel this order?')) {
+          // Get the current order info
+          const trackingInfoString = localStorage.getItem('trackingOrderInfo');
+          const currentOrderInfoString = localStorage.getItem('currentOrderInfo');
+          const orderInfoString = trackingInfoString || currentOrderInfoString;
+          
+          if (orderInfoString) {
+            // Parse the order info
+            const orderInfo = JSON.parse(orderInfoString);
+            
+            // Mark the order as cancelled
+            orderInfo.status = 'cancelled';
+            orderInfo.cancelledAt = new Date().toISOString();
+            
+            // Update the order info in localStorage
+            localStorage.setItem('trackingOrderInfo', JSON.stringify(orderInfo));
+            
+            // Show confirmation message
+            alert('Your order has been cancelled. Refund will be processed within 3-5 business days.');
+            
+            // Redirect to main page
+            window.location.href = 'Main.html';
+          }
+        }
+      });
+      
+      // Support button
+      document.getElementById('support-btn').addEventListener('click', function() {
+        alert('Support team has been notified. Someone will assist you shortly.');
+      });
+    });
+    
+    // Function to update order status
+    function updateOrderStatus(currentStep) {
+      // Update progress bar width
+      const progressBar = document.getElementById('status-progress');
+      const progressWidth = (currentStep - 1) * 25; // 25% for each completed step
+      progressBar.style.width = progressWidth + '%';
+      
+      // Update step icons and labels
+      for (let i = 1; i <= 5; i++) {
+        const stepIcon = document.getElementById(`step-${i}`);
+        const stepLabel = stepIcon.nextElementSibling.querySelector('.step-label');
+        
+        if (i < currentStep) {
+          // Completed steps
+          stepIcon.className = 'step-icon completed';
+          stepIcon.innerHTML = '<i class="fas fa-check"></i>';
+          stepLabel.className = 'step-label completed';
+        } else if (i === currentStep) {
+          // Current step
+          stepIcon.className = 'step-icon active';
+          
+          // Set appropriate icon for current step
+          if (i === 1) stepIcon.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+          else if (i === 2) stepIcon.innerHTML = '<i class="fas fa-clipboard-check"></i>';
+          else if (i === 3) stepIcon.innerHTML = '<i class="fas fa-utensils"></i>';
+          else if (i === 4) stepIcon.innerHTML = '<i class="fas fa-box"></i>';
+          else if (i === 5) stepIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+          
+          stepLabel.className = 'step-label active';
+          
+          // Set current time for this step
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+          });
+          document.getElementById(`time-${i}`).textContent = timeStr;
+        } else {
+          // Future steps
+          stepIcon.className = 'step-icon';
+          
+          // Set appropriate icon for future steps
+          if (i === 1) stepIcon.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+          else if (i === 2) stepIcon.innerHTML = '<i class="fas fa-clipboard-check"></i>';
+          else if (i === 3) stepIcon.innerHTML = '<i class="fas fa-utensils"></i>';
+          else if (i === 4) stepIcon.innerHTML = '<i class="fas fa-box"></i>';
+          else if (i === 5) stepIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+          
+          stepLabel.className = 'step-label';
+        }
+      }
+    }
+  </script>
+</body>
+</html>
