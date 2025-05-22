@@ -80,10 +80,17 @@ This is a web-based College Canteen Management System that allows users to regis
 
 ### Backend Files
 - `db_connection.php` - Database connection and query execution functions
+- `index.php` - Main entry point that redirects to Main.html
+
+### Authentication Files
 - `hdbms/register.php` - Handles user registration
 - `hdbms/login.php` - Handles user login
 - `hdbms/logout.php` - Handles user logout
 - `hdbms/check_session.php` - Checks if a user is logged in
+
+### API Endpoints
+- `get_image.php` - Retrieves images for food items
+- `get_order_history.php` - Retrieves order history for users
 
 ## Database Structure
 
@@ -138,3 +145,9 @@ If you encounter any issues not covered here, please contact the system administ
 - Prepared statements are used to prevent SQL injection
 - Input validation on both client and server sides
 - Session management for secure authentication
+
+### Codebase Cleanup
+The project has been cleaned up to remove unnecessary PHP files that were used during development:
+- All setup, testing, and development utility scripts have been removed
+- Only essential PHP files required for the website's functionality are retained
+- This cleanup improves security by reducing the attack surface and makes the codebase more maintainable
