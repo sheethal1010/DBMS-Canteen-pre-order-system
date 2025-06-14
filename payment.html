@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Payment - Campus Canteen</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+
+  <link rel="stylesheet" href="login.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #fbe2a9, #f5be71, #b26f18);
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+      animation: gradientScroll 15s ease infinite;
+      background-size: 400% 400%;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    /* Override the background image from login.css */
+    body::before {
+      display: none !important;
+    }
+
+    /* Shapes Animation */
+    .shapes-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      animation: float 15s infinite linear;
+      opacity: 0.8;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      background-image: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,107,53,0.2));
+    }
+
+    .shape-1 {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 10%;
+      animation-duration: 25s;
+      animation-delay: 0s;
+      background-color: rgba(255, 255, 255, 0.25);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .shape-2 {
+      width: 140px;
+      height: 140px;
+      top: 70%;
+      left: 80%;
+      animation-duration: 30s;
+      animation-delay: 1s;
+      border-radius: 30%;
+      background-color: rgba(255, 107, 53, 0.25);
+      border: 2px solid rgba(255, 107, 53, 0.4);
+    }
+
+    .shape-3 {
+      width: 80px;
+      height: 80px;
+      top: 30%;
+      left: 85%;
+      animation-duration: 20s;
+      animation-delay: 2s;
+      border-radius: 40%;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .shape-4 {
+      width: 180px;
+      height: 180px;
+      top: 80%;
+      left: 5%;
+      animation-duration: 35s;
+      animation-delay: 3s;
+      border-radius: 20%;
+      background-color: rgba(245, 190, 113, 0.25);
+      border: 2px solid rgba(245, 190, 113, 0.4);
+    }
+
+    .shape-5 {
+      width: 120px;
+      height: 120px;
+      top: 40%;
+      left: 50%;
+      animation-duration: 28s;
+      animation-delay: 4s;
+      border-radius: 35%;
+      background-color: rgba(255, 255, 255, 0.28);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .shape-6 {
+      width: 90px;
+      height: 90px;
+      top: 60%;
+      left: 30%;
+      animation-duration: 22s;
+      animation-delay: 5s;
+      border-radius: 45%;
+      background-color: rgba(178, 111, 24, 0.22);
+      border: 2px solid rgba(178, 111, 24, 0.35);
+    }
+    
+    .shape-7 {
+      width: 110px;
+      height: 110px;
+      top: 15%;
+      left: 60%;
+      animation-duration: 26s;
+      animation-delay: 2s;
+      border-radius: 25%;
+      background-color: rgba(255, 107, 53, 0.2);
+      border: 2px solid rgba(255, 107, 53, 0.35);
+    }
+    
+    .shape-8 {
+      width: 130px;
+      height: 130px;
+      top: 75%;
+      left: 40%;
+      animation-duration: 32s;
+      animation-delay: 0s;
+      border-radius: 15%;
+      background-color: rgba(245, 190, 113, 0.25);
+      border: 2px solid rgba(245, 190, 113, 0.4);
+    }
+    
+    .shape-9 {
+      width: 85px;
+      height: 85px;
+      top: 25%;
+      left: 25%;
+      animation-duration: 24s;
+      animation-delay: 3s;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.22);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+    }
+    
+    .shape-10 {
+      width: 160px;
+      height: 160px;
+      top: 50%;
+      left: 75%;
+      animation-duration: 29s;
+      animation-delay: 1s;
+      border-radius: 40%;
+      background-color: rgba(178, 111, 24, 0.18);
+      border: 2px solid rgba(178, 111, 24, 0.3);
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 0.9;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      }
+      33% {
+        transform: translateY(-70px) rotate(120deg) scale(1.15);
+        opacity: 0.7;
+        box-shadow: 0 0 25px rgba(255, 107, 53, 0.4);
+      }
+      66% {
+        transform: translateY(70px) rotate(240deg) scale(0.85);
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(245, 190, 113, 0.5);
+      }
+      100% {
+        transform: translateY(0) rotate(360deg) scale(1);
+        opacity: 0.9;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.8;
+        border-width: 2px;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.6;
+        border-width: 3px;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 0.8;
+        border-width: 2px;
+      }
+    }
+    
+    .shape-2, .shape-5, .shape-8 {
+      animation: float 15s infinite linear, pulse 5s infinite ease-in-out;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    }
+
+    @keyframes gradientScroll {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .payment-container {
+      max-width: 550px;
+      width: 90%;
+      margin: 5% auto;
+      background-color: rgba(255,255,255,0.92);
+      padding: 35px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25), 0 0 15px rgba(255, 107, 53, 0.1);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.18);
+      z-index: 10;
+      animation: container-glow 8s infinite alternate;
+      /* Indentation effect with inner border */
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.1) 100%),
+        linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.1) 100%);
+      background-repeat: no-repeat;
+      background-position: 
+        0 0, 0 0,
+        100% 0, 0 100%;
+      background-size: 
+        100% 1px, 1px 100%,
+        100% 1px, 1px 100%;
+    }
+    
+    /* Add indentation effect with pseudo-elements */
+    .payment-container::before,
+    .payment-container::after {
+      content: '';
+      position: absolute;
+      width: calc(100% - 40px);
+      height: calc(100% - 40px);
+      top: 20px;
+      left: 20px;
+      border-radius: 10px;
+      pointer-events: none;
+    }
+    
+    .payment-container::before {
+      border: 1px dashed rgba(255, 107, 53, 0.15);
+      z-index: -1;
+    }
+    
+    .payment-container::after {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: -1;
+    }
+    
+    @keyframes container-glow {
+      0% {
+        box-shadow: 0 15px 35px rgba(0,0,0,0.25), 0 0 15px rgba(255, 107, 53, 0.1);
+      }
+      50% {
+        box-shadow: 0 15px 35px rgba(0,0,0,0.25), 0 0 25px rgba(245, 190, 113, 0.3);
+      }
+      100% {
+        box-shadow: 0 15px 35px rgba(0,0,0,0.25), 0 0 20px rgba(178, 111, 24, 0.25);
+      }
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #b26f18;
+      font-size: 1.8rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 0.5rem;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-group:hover {
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #333;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group:hover label {
+      color: #b26f18;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #ff6b35;
+      box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+    }
+
+    .btn-pay {
+      margin-top: 1.8rem;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, #ff6b35, #f5be71);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-pay:hover {
+      background: linear-gradient(to right, #e85a24, #f5a142);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 107, 53, 0.4);
+    }
+    
+    .btn-pay:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(255, 107, 53, 0.4);
+    }
+    
+    .btn-pay::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
+      transform: rotate(30deg);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .btn-pay:hover::after {
+      opacity: 1;
+      animation: shine 1.5s ease-in-out;
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(30deg); }
+      100% { transform: translateX(100%) rotate(30deg); }
+    }
+
+    .icon-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .icon-label i {
+      color: #ff6b35;
+      font-size: 1.1rem;
+    }
+
+    .success-message {
+      text-align: center;
+      color: #2ecc71;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 25px;
+      padding: 15px;
+      display: none;
+      animation: fadeIn 0.6s ease-in-out;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
+      border-left: 3px solid #2ecc71;
+    }
+    
+    .success-message i {
+      font-size: 1.5rem;
+      margin-right: 10px;
+      animation: pulse-success 2s infinite;
+    }
+    
+    @keyframes pulse-success {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Form elements animation */
+    #order-summary, #paymentForm, h1 {
+      animation: fadeIn 0.8s ease-out forwards;
+      opacity: 0;
+    }
+    
+    h1 {
+      animation-delay: 0.2s;
+    }
+    
+    #order-summary {
+      animation-delay: 0.4s;
+    }
+    
+    #paymentForm {
+      animation-delay: 0.6s;
+    }
+
+    /* Order summary styling */
+    #order-summary {
+      background-color: rgba(245, 245, 245, 0.7) !important;
+      border-left: 3px solid #ff6b35;
+      padding: 1rem !important;
+      border-radius: 12px !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    #order-summary h3 {
+      margin-top: 0.5rem;
+      border-bottom: 1px dashed rgba(178, 111, 24, 0.3);
+      padding-bottom: 0.8rem;
+    }
+    
+    #order-items {
+      background-color: rgba(255, 255, 255, 0.5);
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin: 0.8rem 0;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    #order-items > div {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    #order-items > div:last-child {
+      border-bottom: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .payment-container {
+        margin: 8% auto;
+        padding: 25px;
+        width: 85%;
+      }
+      
+      h1 {
+        font-size: 1.6rem;
+      }
+      
+      .btn-pay {
+        padding: 12px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .payment-container {
+        margin: 10% auto;
+        padding: 20px;
+        width: 90%;
+      }
+      
+      h1 {
+        font-size: 1.4rem;
+      }
+      
+      .form-group {
+        padding: 0.3rem;
+      }
+      
+      input, select {
+        padding: 10px;
+      }
+      
+      .btn-pay {
+        padding: 10px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Shapes Animation -->
+  <div class="shapes-container">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    <div class="shape shape-4"></div>
+    <div class="shape shape-5"></div>
+    <div class="shape shape-6"></div>
+    <div class="shape shape-7"></div>
+    <div class="shape shape-8"></div>
+    <div class="shape shape-9"></div>
+    <div class="shape shape-10"></div>
+  </div>
+
+  <div class="payment-container">
+    <a href="Main.html" style="position: absolute; top: 20px; left: 20px; color: #b26f18; font-size: 1.2rem; text-decoration: none;">
+      <i class="fas fa-arrow-left"></i> Back
+    </a>
+    <h1><i class="fas fa-money-check-alt"></i> Payment Portal</h1>
+    
+    <div id="order-summary" class="form-group" style="margin-bottom: 25px; background-color: #f9f9f9; padding: 15px; border-radius: 10px;">
+      <h3 style="margin-bottom: 15px; color: #b26f18;"><i class="fas fa-receipt"></i> Order Summary</h3>
+      <div id="order-details">
+        <p><strong>Order #:</strong> <span id="order-number"></span></p>
+        <p><strong>Pickup Time:</strong> <span id="pickup-time"></span></p>
+        <div id="order-items" style="margin: 10px 0;"></div>
+        <p style="font-size: 1.1rem; font-weight: bold; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+          <strong>Total Amount:</strong> ₹<span id="total-amount"></span>
+        </p>
+      </div>
+    </div>
+    
+    <form id="paymentForm">
+      <div class="form-group">
+        <div class="icon-label"><i class="fas fa-credit-card"></i> <label for="method">Payment Method</label></div>
+        <select id="method" name="method" required>
+          <option value="">Choose option</option>
+          <option value="upi">UPI</option>
+          <option value="card">Credit/Debit Card</option>
+          <option value="cod">Cash on Delivery</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="upiField" style="display:none;">
+        <div class="icon-label"><i class="fab fa-google-pay"></i> <label for="upi">UPI ID</label></div>
+        <input type="text" id="upi" name="upi" placeholder="example@upi" />
+      </div>
+
+      <div id="cardFields" style="display:none;">
+        <div class="form-group">
+          <div class="icon-label"><i class="fas fa-credit-card-front"></i> <label for="cardNumber">Card Number</label></div>
+          <input type="text" id="cardNumber" name="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX" />
+        </div>
+        <div class="form-group">
+          <label for="expiry">Expiry Date</label>
+          <input type="text" id="expiry" name="expiry" placeholder="MM/YY" />
+        </div>
+        <div class="form-group">
+          <label for="cvv">CVV</label>
+          <input type="password" id="cvv" name="cvv" placeholder="123" />
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 1.8rem;">
+        <button type="button" class="btn-pay" style="background: linear-gradient(to right, #888, #aaa); flex: 1;" onclick="window.location.href='Main.html'">Back to Menu</button>
+        <button type="submit" class="btn-pay" style="flex: 2;">Pay Now</button>
+      </div>
+    </form>
+
+    <div id="success" class="success-message" style="display: none;">
+      <i class="fas fa-check-circle fa-lg"></i> Payment successful! Your order has been placed.
+      <div style="margin-top: 15px;">
+        <a href="delivery.html" class="track-order-btn">
+          <i class="fas fa-truck"></i> Track Your Order
+        </a>
+      </div>
+    </div>
+
+    <style>
+      .track-order-btn {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: linear-gradient(to right, #2ecc71, #27ae60);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+      }
+      
+      .track-order-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+      }
+      
+      .track-order-btn i {
+        margin-right: 8px;
+      }
+    </style>
+  </div>
+
+  <script>
+    // Check if user came from checkout process
+    window.addEventListener('DOMContentLoaded', function() {
+      const checkoutCartString = localStorage.getItem('checkoutCart');
+      
+      if (!checkoutCartString) {
+        // If accessed directly without checkout, redirect to main page
+        alert('Please complete your order before proceeding to payment.');
+        window.location.href = 'Main.html';
+        return;
+      }
+    });
+  
+    const methodSelect = document.getElementById("method");
+    const upiField = document.getElementById("upiField");
+    const cardFields = document.getElementById("cardFields");
+    const form = document.getElementById("paymentForm");
+    const successMsg = document.getElementById("success");
+
+    // Load cart information from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkoutCartString = localStorage.getItem('checkoutCart');
+      
+      if (checkoutCartString) {
+        const cartItems = JSON.parse(checkoutCartString);
+        
+        // Generate a random order number
+        const orderNumber = 'ORD-' + Math.floor(Math.random() * 10000);
+        
+        // Generate pickup time (30 minutes from now)
+        const pickupDate = new Date();
+        pickupDate.setMinutes(pickupDate.getMinutes() + 30);
+        const pickupTime = pickupDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        // Calculate total amount
+        let totalAmount = 0;
+        cartItems.forEach(item => {
+          totalAmount += item.price * item.quantity;
+        });
+        
+        // Display order information
+        document.getElementById('order-number').textContent = orderNumber;
+        document.getElementById('pickup-time').textContent = pickupTime;
+        document.getElementById('total-amount').textContent = totalAmount.toFixed(2);
+        
+        // Display order items
+        const orderItemsContainer = document.getElementById('order-items');
+        orderItemsContainer.innerHTML = '<h4 style="margin-bottom: 8px;">Items:</h4>';
+        
+        cartItems.forEach(item => {
+          const itemElement = document.createElement('div');
+          itemElement.style.display = 'flex';
+          itemElement.style.justifyContent = 'space-between';
+          itemElement.style.margin = '5px 0';
+          
+          itemElement.innerHTML = `
+            <span>${item.name} x ${item.quantity}</span>
+            <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+          `;
+          
+          orderItemsContainer.appendChild(itemElement);
+        });
+      } else {
+        // If no cart info is found, redirect back to main page
+        document.getElementById('order-summary').innerHTML = '<p>No order information found. Please return to the main page.</p>';
+        setTimeout(() => {
+          window.location.href = 'Main.html';
+        }, 3000);
+      }
+    });
+
+    methodSelect.addEventListener("change", () => {
+      upiField.style.display = "none";
+      cardFields.style.display = "none";
+
+      if (methodSelect.value === "upi") {
+        upiField.style.display = "block";
+      } else if (methodSelect.value === "card") {
+        cardFields.style.display = "block";
+      }
+    });
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      // Get the payment method
+      const paymentMethod = methodSelect.value;
+      if (!paymentMethod) {
+        alert('Please select a payment method');
+        return;
+      }
+      
+      // Show loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.textContent = 'Processing...';
+      submitBtn.disabled = true;
+      
+      // Get cart info
+      const checkoutCartString = localStorage.getItem('checkoutCart');
+      if (checkoutCartString) {
+        try {
+          const cartItems = JSON.parse(checkoutCartString);
+          
+          console.log('Cart items:', cartItems);
+          console.log('Payment method:', paymentMethod);
+          
+          // Get total amount and pickup time
+          const totalAmount = document.getElementById('total-amount').textContent;
+          const pickupTimeText = document.getElementById('pickup-time').textContent;
+          
+          // Format pickup time properly
+          let pickupTime = pickupTimeText;
+          // Make sure it's in the format "HH:MM am/pm"
+          if (pickupTimeText) {
+            const timeMatch = pickupTimeText.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
+            if (timeMatch) {
+              const [_, hours, minutes, period] = timeMatch;
+              pickupTime = `${hours.padStart(2, '0')}:${minutes} ${period.toLowerCase()}`;
+            }
+          }
+          
+          // Get user data from localStorage
+          const userData = JSON.parse(localStorage.getItem('canteenUserData') || '{}');
+          
+          // Add user ID to each cart item
+          const cartItemsWithUser = cartItems.map(item => ({
+            ...item,
+            userId: userData.id
+          }));
+          
+          // Create order data
+          const orderData = {
+            userId: userData.id,
+            canteenId: 1, // Assuming default canteen for now
+            scheduledTime: pickupTime,
+            pickupCounter: 'Counter 1', // Default pickup counter
+            paymentMethod: paymentMethod,
+            cartItems: cartItems // We need to send the cart items since they may not be in the Cart table
+          };
+          
+          // Check that we have cart items in localStorage
+          if (!checkoutCartString || JSON.parse(checkoutCartString).length === 0) {
+            throw new Error('No items in cart');
+          }
+          
+          // Make sure we have valid user ID
+          if (!userData.id) {
+            throw new Error('User ID is missing. Please log in again.');
+          }
+          
+          console.log('Sending order data:', orderData);
+          
+          // Send order to server using our API endpoint
+          const response = await fetch('/api/orders/place', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+          });
+          
+          // Check if response is OK
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server responded with ${response.status}: ${errorText}`);
+          }
+          
+          const result = await response.json();
+          console.log('Order submission result:', result);
+          
+          if (result.success) {
+            console.log('Order placed successfully:', result);
+            
+            // Create order info object for tracking
+            const orderInfo = {
+              orderId: result.orderId,
+              items: cartItems,
+              orderNumber: document.getElementById('order-number').textContent,
+              pickupTime: document.getElementById('pickup-time').textContent,
+              totalAmount: document.getElementById('total-amount').textContent,
+              paymentMethod: paymentMethod,
+              paymentDate: new Date().toISOString()
+            };
+            
+            // Store order info for delivery tracking
+            localStorage.setItem('trackingOrderInfo', JSON.stringify(orderInfo));
+            
+            // Also store in order history for immediate display
+            const orderHistoryData = localStorage.getItem('orderHistory') || '[]';
+            const orderHistory = JSON.parse(orderHistoryData);
+            orderHistory.push(orderInfo);
+            localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+            
+            // Clear cart after successful payment
+            localStorage.removeItem('cart');
+            
+            // Show success message
+            form.style.display = "none";
+            successMsg.style.display = "block";
+            
+            // Add a link to order history
+            const orderHistoryLink = document.createElement('a');
+            orderHistoryLink.href = 'orderhistory.html';
+            orderHistoryLink.className = 'track-order-btn';
+            orderHistoryLink.style.marginLeft = '10px';
+            orderHistoryLink.innerHTML = '<i class="fas fa-history"></i> View Order History';
+            
+            document.querySelector('.track-order-btn').parentNode.appendChild(orderHistoryLink);
+          } else {
+            console.error('Error placing order:', result);
+            alert('Error placing order: ' + result.message);
+            
+            // Reset button
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
+          }
+        } catch (error) {
+          console.error('Error processing order:', error);
+          alert('Error processing order. Please try again.');
+          
+          // Reset button
+          submitBtn.textContent = originalBtnText;
+          submitBtn.disabled = false;
+        }
+      } else {
+        alert('No items in cart');
+        
+        // Reset button
+        submitBtn.textContent = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

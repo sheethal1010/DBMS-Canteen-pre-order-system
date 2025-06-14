@@ -1,0 +1,60 @@
+DUAL LICENSE - DBMS Canteen System
+
+Copyright (c) 2024, Sheethal
+
+This software is licensed under a dual licensing model:
+
+=== NON-COMMERCIAL LICENSE ===
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, and distribute the Software for NON-COMMERCIAL purposes only,
+subject to the following conditions:
+
+1. ATTRIBUTION REQUIRED: You must give appropriate credit to the original author
+   (Sheethal), provide a link to the original source, and indicate if changes
+   were made. You may do so in any reasonable manner, but not in any way that
+   suggests the licensor endorses you or your use.
+
+2. NON-COMMERCIAL USE ONLY: You may not use the material for commercial purposes.
+   Commercial purposes include, but are not limited to:
+   - Using the software in a business environment for profit
+   - Selling products or services that incorporate this software
+   - Using the software to generate revenue directly or indirectly
+
+3. EDUCATIONAL/STUDY USE: This license explicitly permits use for educational,
+   research, academic, and personal study purposes.
+
+4. OPEN CONTRIBUTIONS: Contributions to this project are welcome and encouraged.
+   By contributing, you agree that your contributions will be licensed under
+   the same dual license terms.
+
+=== COMMERCIAL LICENSE ===
+
+For COMMERCIAL use of this software, you must obtain explicit written
+permission from the copyright holder. Commercial use requires:
+
+1. EXPLICIT PERMISSION: Written permission from Sheethal before any commercial use
+2. ATTRIBUTION: Prominent attribution in your product/service as specified by Sheethal
+3. COMPLIANCE: Follow any additional terms and conditions specified by Sheethal
+   at the time permission is granted
+
+To obtain commercial permission, contact: jsheethalbtech24@rvu.edu.in
+
+=== GENERAL TERMS ===
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+=== DEFINITIONS ===
+
+"Commercial purposes" means any use that is primarily intended for or directed
+toward commercial advantage or monetary compensation.
+
+"Attribution" means you must retain all copyright notices and provide clear
+attribution to the original author in any derivative works or distributions.

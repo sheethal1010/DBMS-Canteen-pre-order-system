@@ -1,0 +1,2688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' https://img.icons8.com https://randomuser.me data:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self';">
+    <title>Staff Portal - Cravings</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+<script src="js/auth-handler.js"></script>
+<script>
+    // Global variable to track selected canteen
+    let selectedCanteen = null;
+    
+    // Staff authentication check and user data initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // First, ensure the staff name shows immediately, even if loading
+        const staffNameEl = document.getElementById('staff-name');
+        if (staffNameEl) {
+            // Try to get name from localStorage
+            try {
+                const storedData = localStorage.getItem('canteenUserData');
+                if (storedData) {
+                    const userData = JSON.parse(storedData);
+                    if (userData.fullName) {
+                        staffNameEl.textContent = userData.fullName;
+                    }
+                }
+            } catch (e) {
+                console.error("Error updating staff name initially:", e);
+            }
+        }
+        
+        const userData = localStorage.getItem('canteenUserData');
+        
+        // Check if user is logged in
+        if (!userData || !JSON.parse(userData).isLoggedIn) {
+            console.log("User not logged in, redirecting to login page");
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // If this is a page refresh, check sessionStorage
+        const isStaffUser = sessionStorage.getItem('isStaffUser') === 'true';
+        
+        // Check if user is staff
+        const user = JSON.parse(userData);
+        console.log("User data in staffs.html:", user);
+        
+        // Make sure we capture all possible staff types, including case variations
+        const staffTypes = ['staff', 'kitchenstaff', 'admin'];
+        const userType = user.accountType ? user.accountType.toLowerCase() : '';
+        
+        if (!userType || !staffTypes.includes(userType)) {
+            console.log("Non-staff user detected, redirecting to login.html");
+            // Instead of sending to Main.html, send back to login
+            // This prevents unauthorized access but doesn't create a redirect loop
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Store the staff status in sessionStorage to prevent redirection on refresh
+        sessionStorage.setItem('isStaffUser', 'true');
+        
+        console.log("Staff authentication successful");
+        
+        // Fetch canteens from the server
+        fetchCanteens();
+        
+        // Initialize welcome name
+        initializeWelcomeName();
+        
+        // No need for the setTimeout anymore since we're handling this in initializeWelcomeName
+        // The function below is kept for reference but has been commented out
+        /*
+        setTimeout(() => {
+            // Update UI with user information has been moved to initializeWelcomeName
+            console.log('Staff page UI initialization complete');
+        }, 100);
+        */
+    });
+    
+    // Function to fetch canteens from the server
+    function fetchCanteens() {
+        console.log("Fetching canteens from server");
+        
+        // Add some sample canteens for testing if the API fails
+        const sampleCanteens = [
+            {
+                Canteen_ID: 1,
+                NAME: "Main Canteen",
+                LOCATION: "Main Building, Ground Floor",
+                OPENING_HOURS: "8:00 AM - 6:00 PM",
+                CONTACT: "555-1234",
+                image_path: "https://img.icons8.com/color/96/000000/restaurant-building.png"
+            },
+            {
+                Canteen_ID: 2,
+                NAME: "Express Cafe",
+                LOCATION: "Library, First Floor",
+                OPENING_HOURS: "9:00 AM - 8:00 PM",
+                CONTACT: "555-5678",
+                image_path: "https://img.icons8.com/color/96/000000/cafe.png"
+            },
+            {
+                Canteen_ID: 3,
+                NAME: "Food Court",
+                LOCATION: "Student Center, Second Floor",
+                OPENING_HOURS: "7:30 AM - 9:00 PM",
+                CONTACT: "555-9012",
+                image_path: "https://img.icons8.com/color/96/000000/food-truck.png"
+            }
+        ];
+        
+        fetch('/api/canteens')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(canteens => {
+                console.log("Canteens loaded:", canteens);
+                if (canteens && canteens.length > 0) {
+                    renderCanteenCards(canteens);
+                } else {
+                    console.log("No canteens returned from API, using sample data");
+                    renderCanteenCards(sampleCanteens);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching canteens:', error);
+                // Use sample data if API fails
+                console.log("Using sample canteen data due to API error");
+                renderCanteenCards(sampleCanteens);
+                
+                // Show warning message but don't block functionality
+                document.getElementById('canteenLoadingIndicator').innerHTML = `
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Using sample data - couldn't connect to server. Some features may be limited.
+                    </div>
+                `;
+            });
+    }
+    
+    // Function to render canteen cards based on data from the server
+    function renderCanteenCards(canteens) {
+        const container = document.getElementById('canteenCardsContainer');
+        
+        // Remove loading indicator
+        document.getElementById('canteenLoadingIndicator').remove();
+        
+        // Generate cards for each canteen
+        canteens.forEach((canteen, index) => {
+            // Generate unique ID for the canteen
+            const canteenId = `canteen${canteen.Canteen_ID}`;
+            
+            // Custom orange color for all canteens
+            const color = 'custom-orange';
+            
+            // Define default icons if image_path is not available
+            const defaultIcons = [
+                'https://img.icons8.com/color/96/000000/restaurant-building.png',
+                'https://img.icons8.com/color/96/000000/cafe.png',
+                'https://img.icons8.com/color/96/000000/food-truck.png'
+            ];
+            
+            // Get icon from the images table or use default
+            const iconSrc = canteen.image_path || defaultIcons[index % defaultIcons.length];
+            
+            // Create a location label (first part of the location before a comma)
+            const locationLabel = canteen.LOCATION.includes(',') ? 
+                canteen.LOCATION.split(',')[0].trim() : 
+                canteen.LOCATION;
+            
+            // Generate a staff code for this canteen
+            const staffCode = `${canteen.NAME.substring(0, 2).toUpperCase()}${canteen.Canteen_ID}${Math.floor(100 + Math.random() * 900)}`;
+            
+            // Register this code for authentication
+            registerCanteenCode(canteenId, staffCode);
+                
+            // Create canteen card HTML
+            const cardHTML = `
+                <div class="col-lg-4 col-md-6">
+                    <div class="canteen-card card h-100 border-0 shadow-sm" 
+                         id="${canteenId}" 
+                         data-canteen-id="${canteen.Canteen_ID}" 
+                         onclick="selectCanteen('${canteenId}', '${canteen.NAME}', '${canteen.LOCATION}', '${iconSrc}')">
+                        <div class="canteen-banner bg-${color} text-white text-center py-2">
+                            <small class="text-uppercase">${locationLabel}</small>
+                        </div>
+                        <div class="card-body text-center p-4">
+                            <div class="canteen-icon-wrapper mb-3">
+                                <img src="${iconSrc}" alt="${canteen.NAME}" class="canteen-icon">
+                            </div>
+                            <h4 class="mb-2">${canteen.NAME}</h4>
+                            <p class="text-muted mb-3">${canteen.LOCATION}</p>
+                            <div class="canteen-stats d-flex justify-content-around mb-3">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock text-custom-orange"></i>
+                                    <span>${canteen.OPENING_HOURS || '8:00 AM - 8:00 PM'}</span>
+                                    <small>Hours</small>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-phone text-custom-orange"></i>
+                                    <span>${canteen.CONTACT || 'N/A'}</span>
+                                    <small>Contact</small>
+                                </div>
+                            </div>
+                            <div class="canteen-code mt-2 bg-light rounded p-2">
+                                Staff Code: <span class="text-custom-orange fw-bold">${staffCode}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-center pb-4">
+                            <button class="btn btn-outline-custom-orange px-4 select-btn">Select & Authenticate</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add card to container
+            container.innerHTML += cardHTML;
+        });
+        
+        // If no canteens were found
+        if (canteens.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center p-5">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No canteens found. Please contact the administrator.
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    function logout() {
+        // Clear staff session flag
+        sessionStorage.removeItem('isStaffUser');
+        
+        // Use the logout function from auth-handler.js
+        if (window.authHandler && window.authHandler.logout) {
+            window.authHandler.logout();
+        } else {
+            // Fallback if auth-handler.js is not loaded
+            localStorage.removeItem('canteenUserData');
+            window.location.href = 'login.html';
+        }
+    }
+</script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #efa52c; /* Main theme color */
+            --primary-light: #fad59a; /* Lighter version */
+            --primary-dark: #e0b06e; /* Darker version */
+            --secondary-color: #8e5a2b; /* Complementary brown */
+            --accent-color: #b27b3d; /* Medium brown accent */
+            --success-color: #22C55E;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+            --light-color: #F8FAFC;
+            --dark-color: #5d4b36; /* Dark brown */
+            --gray-100: #F1F5F9;
+            --gray-200: #E2E8F0;
+            --gray-300: #CBD5E1;
+            --gray-400: #94A3B8;
+            --gray-500: #64748B;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1E293B;
+            --gray-900: #0F172A;
+            --border-radius: 12px;
+            --card-border-radius: 16px;
+            --button-border-radius: 8px;
+            --transition-speed: 0.3s;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Base styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--gray-900);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        /* Sidebar removed as requested */
+        
+        .main-content {
+            padding: 20px;
+            transition: 0.3s;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border-radius: 0.35rem;
+            margin-bottom: 20px;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-title h5 {
+            color: var(--secondary-color);
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .user-info .badge {
+            margin-left: 10px;
+            background-color: var(--primary-color);
+        }
+        
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats-card {
+            border-left: 4px solid;
+            transition: transform 0.3s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-card.primary {
+            border-left-color: var(--primary-color);
+        }
+        
+        .stats-card.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .stats-card.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .stats-card.danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .stats-card .card-body {
+            padding: 20px;
+        }
+        
+        .stats-card .card-title {
+            text-transform: uppercase;
+            color: var(--dark-color);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card .card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+        
+        .stats-card i {
+            font-size: 2rem;
+            color: #dddfeb;
+        }
+        
+        .canteen-selector {
+            margin-bottom: 20px;
+        }
+        
+        .canteen-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .canteen-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem 0 rgba(58, 59, 69, 0.15);
+        }
+        
+        .canteen-card.selected {
+            border-color: var(--secondary-color);
+            background-color: rgba(255, 140, 0, 0.05);
+        }
+        
+        .canteen-card .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .canteen-card img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        
+        .canteen-card h5 {
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .canteen-card p {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+        
+        .canteen-code {
+            background-color: #f8f9fc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--dark-color);
+        }
+        
+        .canteen-code span {
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        
+        .order-table th, .order-table td {
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        .status-badge.pending {
+            background-color: #eaecf4;
+            color: var(--dark-color);
+        }
+        
+        .status-badge.preparing {
+            background-color: rgba(246, 194, 62, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .status-badge.ready {
+            background-color: rgba(28, 200, 138, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-badge.not-picked {
+            background-color: rgba(231, 74, 59, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .status-badge.cancelled {
+            background-color: rgba(90, 92, 105, 0.2);
+            color: var(--dark-color);
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+        
+        .inventory-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 0.1rem 0.5rem 0 rgba(58, 59, 69, 0.1);
+        }
+        
+        .inventory-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        
+        .inventory-item-info {
+            flex-grow: 1;
+        }
+        
+        .inventory-item-info h5 {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .inventory-item-info p {
+            margin-bottom: 0;
+            color: var(--dark-color);
+            font-size: 0.9rem;
+        }
+        
+        .inventory-item .form-check {
+            margin-left: 15px;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .auth-modal .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .auth-modal .modal-title {
+            color: white;
+        }
+        
+        .auth-modal .modal-footer {
+            justify-content: center;
+        }
+        
+        .auth-code-input {
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* Modern card styling */
+        .card {
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        
+        /* Welcome message styling */
+        .welcome-message {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .welcome-message h4 {
+            color: var(--secondary-color);
+        }
+        
+        .welcome-icon {
+            height: 80px;
+            width: 80px;
+            background-color: rgba(255, 140, 0, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        
+        /* Steps indicator */
+        .steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            min-width: 80px;
+        }
+        
+        .step-icon {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-icon {
+            background-color: var(--secondary-color);
+            color: white;
+            box-shadow: 0 0 0 5px rgba(255, 140, 0, 0.2);
+        }
+        
+        .step-connector {
+            height: 3px;
+            background-color: #e9ecef;
+            width: 50px;
+            flex-shrink: 0;
+        }
+        
+        .step.active + .step-connector {
+            background-color: var(--secondary-color);
+        }
+        
+        .step-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .step.active .step-text {
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        /* Canteen cards styling */
+        .canteen-card {
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .canteen-banner {
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        /* Custom orange color class */
+        .bg-custom-orange {
+            background-color: #ff8d21 !important;
+        }
+        
+        .text-custom-orange {
+            color: #ff8d21 !important;
+        }
+        
+        .btn-outline-custom-orange {
+            color: #ff8d21;
+            border-color: #ff8d21;
+        }
+        
+        .btn-outline-custom-orange:hover {
+            color: white;
+            background-color: #ff8d21;
+            border-color: #ff8d21;
+        }
+        
+        .canteen-icon-wrapper {
+            height: 90px;
+            width: 90px;
+            background-color: rgba(0,0,0,0.03);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+        
+        .canteen-icon {
+            height: 60px;
+            width: 60px;
+        }
+        
+        .canteen-stats {
+            font-size: 0.85rem;
+        }
+        
+        .canteen-stats .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .canteen-stats .stat-item i {
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+        
+        .canteen-stats .stat-item span {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .canteen-stats .stat-item small {
+            color: #6c757d;
+            font-size: 0.75rem;
+        }
+        
+        /* Dashboard header styling */
+        .dashboard-header {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .dashboard-welcome {
+            border-right: 1px solid #eee;
+        }
+        
+        .dashboard-canteen-icon {
+            height: 70px;
+            width: 70px;
+            background-color: rgba(255, 140, 0, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Logout button styling */
+        .user-info .btn-link {
+            padding: 6px 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info .btn-link:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+            transform: scale(1.1);
+        }
+        
+        /* Improve canteen cards */
+        .canteen-card {
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .canteen-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .canteen-card.selected {
+            border-color: var(--secondary-color);
+            background-color: rgba(255, 140, 0, 0.05);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .canteen-card img {
+            transition: all 0.3s ease;
+        }
+        
+        .canteen-card:hover img {
+            transform: scale(1.1);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar.active {
+                width: 250px;
+                padding: 10px;
+            }
+            
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+        
+        /* Animation for new orders */
+        @keyframes newOrderPulse {
+            0% {
+                background-color: rgba(255, 107, 107, 0.1);
+            }
+            50% {
+                background-color: rgba(255, 107, 107, 0.3);
+            }
+            100% {
+                background-color: rgba(255, 107, 107, 0.1);
+            }
+        }
+        
+        .new-order {
+            animation: newOrderPulse 2s infinite;
+        }
+        
+        /* Tabs styling */
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            font-weight: 600;
+            border: none;
+            padding: 10px 20px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--secondary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            background-color: transparent;
+        }
+        
+        /* Toggle for mobile */
+        .toggle-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--dark-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        
+        /* Override Bootstrap's button colors */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            border-radius: var(--button-border-radius);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.2);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 500;
+            border-radius: var(--button-border-radius);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover, .btn-outline-primary.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.2);
+        }
+        
+        /* Card hover effects */
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: var(--card-border-radius);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-lg);
+        }
+        
+        /* Auth modal animations */
+        .modal-content {
+            animation: fadeInUp 0.4s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="fade-in">
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <h5 class="mb-0">Staff Dashboard</h5>
+            </div>
+            <div class="user-info">
+                <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Staff Photo" id="staff-photo">
+                <div>
+                    <h6 class="mb-0" id="staff-name">Loading...</h6>
+                    <span class="badge" style="background-color: var(--primary-color);" id="staff-role">Staff</span>
+                </div>
+                <button class="btn btn-link text-danger ms-3 d-flex align-items-center justify-content-center" onclick="logout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Staff Welcome Message -->
+        <div class="welcome-message card mb-4" id="welcomeMessage">
+            <div class="card-body text-center py-5">
+                <div class="welcome-icon mb-4">
+                    <i class="fas fa-utensils fa-3x" style="color: #f5c77e;"></i>
+                </div>
+                <h2 class="mb-3">Welcome to Cravings Staff Portal</h2>
+                <h4 class="mb-4">Hello, <span id="welcome-name" style="color: var(--primary-color); font-weight: 700;">Staff Member</span>!</h4>
+                <p class="lead">Please select a canteen from the options below and authenticate to continue.</p>
+                
+                <div class="d-flex justify-content-center mt-5">
+                    <div class="steps d-flex">
+                        <div class="step active completed">
+                            <div class="step-icon"><i class="fas fa-user-check"></i></div>
+                            <div class="step-text">Login</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step active">
+                            <div class="step-icon"><i class="fas fa-store"></i></div>
+                            <div class="step-text">Select Canteen</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step">
+                            <div class="step-icon"><i class="fas fa-key"></i></div>
+                            <div class="step-text">Authenticate</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step">
+                            <div class="step-icon"><i class="fas fa-tasks"></i></div>
+                            <div class="step-text">Manage Orders</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Select one of the canteen cards below to continue to the dashboard.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canteen Selection Section -->
+        <div class="canteen-selector mb-5" id="canteenSelector">
+            <div class="card shadow-sm border-0" style="border-radius: var(--card-border-radius);">
+                <div class="card-header bg-transparent border-0">
+                    <div class="d-flex align-items-center justify-content-between py-3">
+                        <h4 class="mb-0"><i class="fas fa-store me-3" style="color: #f5c77e;"></i>Select Your Canteen</h4>
+                        <div class="input-group" style="max-width: 250px;">
+                            <span class="input-group-text bg-light border-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control bg-light border-0" id="canteenSearch" placeholder="Search canteens...">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="row g-4 justify-content-center" id="canteenCardsContainer">
+                        <!-- Canteen cards will be dynamically loaded here -->
+                        <div class="col-12 text-center p-5" id="canteenLoadingIndicator">
+                            <div class="spinner-border" style="color: var(--primary-color);" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading available canteens...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Selected Canteen Dashboard (Initially Hidden) -->
+        <div id="staffDashboard" style="display: none;">
+        
+        <!-- Selected Canteen Info Section -->
+        <div id="selectedCanteenInfo">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header card mb-4">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-8">
+                            <div class="dashboard-welcome p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="dashboard-canteen-icon me-3" id="dashboardCanteenIcon">
+                                        <img src="images/canteens/default-canteen.jpg" alt="Canteen" id="canteenIconImg" width="60" class="rounded">
+                                    </div>
+                                    <div>
+                                        <h3 class="mb-1" id="dashboardCanteenName" class="selectedCanteenName">Canteen Name</h3>
+                                        <p class="mb-0 text-muted" id="dashboardCanteenLocation" class="selectedCanteenLocation">Location</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center mt-2">
+                                    <span class="badge bg-success me-2 px-3 py-2">Open Now</span>
+                                    <span class="text-muted"><i class="far fa-clock me-1"></i>Operating Hours: 7:30 AM - 7:00 PM</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="dashboard-actions p-4 text-md-end">
+                                <button class="btn btn-outline-secondary me-2" onclick="changeCanteen()">
+                                    <i class="fas fa-exchange-alt me-1"></i>Change Canteen
+                                </button>
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-cog me-1"></i>Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard welcome message -->
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-3 fa-2x"></i>
+                    <div>
+                        <h5 class="alert-heading mb-1">Successfully authenticated!</h5>
+                        <p class="mb-0">You are now managing <strong id="alertCanteenName">Canteen Name</strong>. You can view and manage all orders for this location.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+        <!-- Dashboard Stats (Initially Hidden) -->
+        <div class="row mb-4" id="dashboardStats" style="display: none;">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card primary h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">PENDING ORDERS</div>
+                                <div class="card-value" id="pendingOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clock fa-2x" style="color: #f5c77e;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card warning h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">PREPARING</div>
+                                <div class="card-value" id="preparingOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-utensils fa-2x" style="color: #f5c77e;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card success h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">READY FOR PICKUP</div>
+                                <div class="card-value" id="readyOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle fa-2x" style="color: #f5c77e;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card danger h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">TODAY'S TOTAL</div>
+                                <div class="card-value" id="todaysTotalValue">$0.00</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-dollar-sign fa-2x" style="color: #f5c77e;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders Management Section -->
+            <div class="card mb-4 shadow-sm" id="ordersManagement">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2" style="color: #f5c77e;"></i>Orders Management</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="ordersTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="pending-tab" data-bs-toggle="tab" href="#pending" role="tab">
+                                <i class="fas fa-clock me-1"></i>Pending <span class="badge bg-secondary rounded-pill ms-1" id="pendingTabCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="preparing-tab" data-bs-toggle="tab" href="#preparing" role="tab">
+                                <i class="fas fa-utensils me-1"></i>Preparing <span class="badge bg-secondary rounded-pill ms-1" id="preparingTabCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="ready-tab" data-bs-toggle="tab" href="#ready" role="tab">
+                                <i class="fas fa-check-circle me-1"></i>Ready <span class="badge bg-secondary rounded-pill ms-1" id="readyTabCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="completed-tab" data-bs-toggle="tab" href="#completed" role="tab">
+                                <i class="fas fa-flag-checkered me-1"></i>Completed
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3 border border-top-0 rounded-bottom" id="ordersTabContent">
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingOrdersTable">
+                                        <!-- Sample row, will be populated dynamically -->
+                                        <tr>
+                                            <td>#ORD-1234</td>
+                                            <td>John Smith</td>
+                                            <td>
+                                                <div>Chicken Sandwich</div>
+                                                <div>Fries (L)</div>
+                                                <div>Soda (M)</div>
+                                            </td>
+                                            <td>$12.99</td>
+                                            <td>10:45 AM</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary action-btn">Start Preparing</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="preparing" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="preparingOrdersTable">
+                                        <!-- Sample row, will be populated dynamically -->
+                                        <tr>
+                                            <td>#ORD-1233</td>
+                                            <td>Jane Doe</td>
+                                            <td>
+                                                <div>Veggie Burger</div>
+                                                <div>Salad</div>
+                                            </td>
+                                            <td>$9.99</td>
+                                            <td>10:40 AM</td>
+                                            <td><span class="status-badge preparing">Preparing</span></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-success action-btn">Mark Ready</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="ready" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="readyOrdersTable">
+                                        <!-- Will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="completedOrdersTable">
+                                        <!-- Will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card warning">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Preparing</div>
+                                <div class="card-value" id="preparingOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card success">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Ready for Pickup</div>
+                                <div class="card-value" id="readyOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card stats-card danger">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="card-title">Cancelled</div>
+                                <div class="card-value" id="cancelledOrderCount">0</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome Message -->
+        <div class="alert alert-info mb-4" id="welcomeMessage">
+            <h4><i class="fas fa-info-circle me-2"></i>Welcome to the Staff Portal</h4>
+            <p class="mb-0">Please select your canteen and authenticate to manage orders and inventory.</p>
+        </div>
+        
+        <!-- Dynamic canteen selection is now handled by the canteenSelector div above -->
+
+        <!-- Orders Management (Initially Hidden) -->
+        <div id="ordersManagement" style="display: none;">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0" id="canteenTitle">Big Mingoes - Orders Management</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                                Pending <span class="badge bg-secondary ms-2">12</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="preparing-tab" data-bs-toggle="tab" data-bs-target="#preparing" type="button" role="tab">
+                                Preparing <span class="badge bg-warning ms-2">5</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ready-tab" data-bs-toggle="tab" data-bs-target="#ready" type="button" role="tab">
+                                Ready for Pickup <span class="badge bg-success ms-2">7</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                                Completed/Cancelled <span class="badge bg-secondary ms-2">10</span>
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="orderTabsContent">
+                        <!-- Pending Orders Tab -->
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="new-order">
+                                            <td>#ORD-2023</td>
+                                            <td>Alice Johnson</td>
+                                            <td>
+                                                <div>1x Chicken Burger</div>
+                                                <div>1x French Fries</div>
+                                                <div>1x Coke</div>
+                                            </td>
+                                            <td>₹250</td>
+                                            <td>Just now</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2022</td>
+                                            <td>Bob Smith</td>
+                                            <td>
+                                                <div>2x Veg Sandwich</div>
+                                                <div>2x Mango Juice</div>
+                                            </td>
+                                            <td>₹180</td>
+                                            <td>5 mins ago</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2021</td>
+                                            <td>Charlie Brown</td>
+                                            <td>
+                                                <div>1x Masala Dosa</div>
+                                                <div>1x Filter Coffee</div>
+                                            </td>
+                                            <td>₹120</td>
+                                            <td>10 mins ago</td>
+                                            <td><span class="status-badge pending">Pending</span></td>
+                                            <td>
+                                                <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Preparing Orders Tab -->
+                        <div class="tab-pane fade" id="preparing" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Started</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2020</td>
+                                            <td>David Wilson</td>
+                                            <td>
+                                                <div>1x Paneer Tikka</div>
+                                                <div>2x Butter Naan</div>
+                                                <div>1x Lassi</div>
+                                            </td>
+                                            <td>₹350</td>
+                                            <td>15 mins ago</td>
+                                            <td><span class="status-badge preparing">Preparing</span></td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm action-btn">Mark Ready</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2019</td>
+                                            <td>Eva Martinez</td>
+                                            <td>
+                                                <div>1x Veg Biryani</div>
+                                                <div>1x Raita</div>
+                                            </td>
+                                            <td>₹180</td>
+                                            <td>20 mins ago</td>
+                                            <td><span class="status-badge preparing">Preparing</span></td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm action-btn">Mark Ready</button>
+                                                <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Ready for Pickup Tab -->
+                        <div class="tab-pane fade" id="ready" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Ready Since</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2018</td>
+                                            <td>Frank Thomas</td>
+                                            <td>
+                                                <div>1x Chicken Fried Rice</div>
+                                                <div>1x Manchurian</div>
+                                            </td>
+                                            <td>₹220</td>
+                                            <td>5 mins ago</td>
+                                            <td><span class="status-badge ready">Ready</span></td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm action-btn">Mark Picked Up</button>
+                                                <button class="btn btn-secondary btn-sm action-btn">Not Picked Up</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2017</td>
+                                            <td>Grace Lee</td>
+                                            <td>
+                                                <div>2x Samosa</div>
+                                                <div>1x Tea</div>
+                                            </td>
+                                            <td>₹80</td>
+                                            <td>15 mins ago</td>
+                                            <td><span class="status-badge ready">Ready</span></td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm action-btn">Mark Picked Up</button>
+                                                <button class="btn btn-secondary btn-sm action-btn">Not Picked Up</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Completed/Cancelled Tab -->
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover order-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-2016</td>
+                                            <td>Henry Garcia</td>
+                                            <td>
+                                                <div>1x Veg Pulao</div>
+                                                <div>1x Sweet Lassi</div>
+                                            </td>
+                                            <td>₹150</td>
+                                            <td>1 hour ago</td>
+                                            <td><span class="status-badge not-picked">Not Picked Up</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-2015</td>
+                                            <td>Ivy Robinson</td>
+                                            <td>
+                                                <div>1x Veg Burger</div>
+                                                <div>1x French Fries</div>
+                                            </td>
+                                            <td>₹180</td>
+                                            <td>2 hours ago</td>
+                                            <td><span class="status-badge cancelled">Cancelled</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Management -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Inventory Management</h5>
+                    <button class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add New Item
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Search inventory items...">
+                                <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary active">All</button>
+                                <button type="button" class="btn btn-outline-primary">Available</button>
+                                <button type="button" class="btn btn-outline-primary">Unavailable</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inventory-list">
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Burger" alt="Chicken Burger">
+                            <div class="inventory-item-info">
+                                <h5>Chicken Burger</h5>
+                                <p>Classic chicken patty with lettuce, tomato, and special sauce</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item1" checked>
+                                <label class="form-check-label" for="item1">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Sandwich" alt="Veg Sandwich">
+                            <div class="inventory-item-info">
+                                <h5>Veg Sandwich</h5>
+                                <p>Fresh vegetables with cheese and mayo</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item2" checked>
+                                <label class="form-check-label" for="item2">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Dosa" alt="Masala Dosa">
+                            <div class="inventory-item-info">
+                                <h5>Masala Dosa</h5>
+                                <p>South Indian crepe with spiced potato filling</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item3">
+                                <label class="form-check-label" for="item3">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Biryani" alt="Veg Biryani">
+                            <div class="inventory-item-info">
+                                <h5>Veg Biryani</h5>
+                                <p>Fragrant rice with mixed vegetables and spices</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item4" checked>
+                                <label class="form-check-label" for="item4">Available</label>
+                            </div>
+                        </div>
+                        <div class="inventory-item">
+                            <img src="https://via.placeholder.com/60x60.png?text=Samosa" alt="Samosa">
+                            <div class="inventory-item-info">
+                                <h5>Samosa</h5>
+                                <p>Crispy pastry with spiced potato filling</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="item5" checked>
+                                <label class="form-check-label" for="item5">Available</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- Close staffDashboard -->
+
+    <!-- Authentication Modal -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content auth-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="authModalLabel">Canteen Pre-Order System - Staff Authentication</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <img src="" alt="Canteen Logo" id="authCanteenLogo" width="80" height="80">
+                        <h4 class="mt-3" id="authCanteenName">Select a Canteen</h4>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="authCode" class="form-label">Enter Staff Authentication Code</label>
+                        <input type="password" class="form-control auth-code-input" id="authCode" maxlength="6" placeholder="******">
+                        <div class="invalid-feedback">
+                            Invalid authentication code. Please try again.
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> This code is provided to authorized staff members only. If you don't have a code, please contact your manager.
+                    </div>
+                    <div class="alert alert-warning" id="authWarning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <span id="authWarningText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="authSubmit">Authenticate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth-handler.js"></script>
+    
+    <script>
+        // Store valid authentication codes for each canteen
+        const canteenCodes = {};
+        
+        // Function to register a canteen code
+        function registerCanteenCode(canteenId, code) {
+            console.log(`Registering code for ${canteenId}: ${code}`);
+            canteenCodes[canteenId] = code;
+        }
+        
+        // Toggle Sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('sidebar-collapsed');
+                    mainContent.classList.toggle('expanded');
+                });
+            }
+            
+            // Handle canteen search
+            const canteenSearch = document.getElementById('canteenSearch');
+            if (canteenSearch) {
+                canteenSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const canteenCards = document.querySelectorAll('.canteen-card');
+                    
+                    canteenCards.forEach(card => {
+                        const canteenName = card.querySelector('h4').textContent.toLowerCase();
+                        const canteenLocation = card.querySelector('p').textContent.toLowerCase();
+                        
+                        if (canteenName.includes(searchTerm) || canteenLocation.includes(searchTerm)) {
+                            card.closest('.col-lg-4').style.display = 'block';
+                        } else {
+                            card.closest('.col-lg-4').style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+        
+        // Validate canteen authentication code
+        document.getElementById('authSubmit').addEventListener('click', function() {
+            const enteredCode = document.getElementById('authCode').value.trim();
+            const canteenId = selectedCanteen;
+            
+            console.log('Checking code:', enteredCode, 'against registered code:', canteenCodes[canteenId]);
+            
+            if (enteredCode === canteenCodes[canteenId]) {
+                // Success - hide modal and show dashboard
+                const modalElement = document.getElementById('authModal');
+                const authModal = bootstrap.Modal.getInstance(modalElement);
+                if (authModal) {
+                    authModal.hide();
+                } else {
+                    // Fallback if modal instance isn't found
+                    $(modalElement).modal('hide');
+                }
+                
+                // Show dashboard content
+                document.getElementById('canteenSelector').style.display = 'none';
+                
+                // Hide welcome message after successful authentication
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                if (welcomeMessage) {
+                    welcomeMessage.style.display = 'none';
+                }
+                
+                // Make sure staffDashboard exists before trying to show it
+                const staffDashboard = document.getElementById('staffDashboard');
+                if (staffDashboard) {
+                    staffDashboard.style.display = 'block';
+                } else {
+                    console.error('staffDashboard element not found');
+                }
+                
+                // Update canteen name in dashboard and success message
+                const canteenData = JSON.parse(localStorage.getItem('selectedCanteen'));
+                if (canteenData) {
+                    // Check if these elements exist before updating
+                    const dashboardCanteenName = document.getElementById('dashboardCanteenName');
+                    const dashboardCanteenLocation = document.getElementById('dashboardCanteenLocation');
+                    const alertCanteenName = document.getElementById('alertCanteenName');
+                    
+                    // Update the dashboard canteen name
+                    if (dashboardCanteenName) {
+                        dashboardCanteenName.textContent = canteenData.name;
+                    }
+                    
+                    // Update the dashboard canteen location
+                    if (dashboardCanteenLocation) {
+                        dashboardCanteenLocation.textContent = canteenData.location;
+                    }
+                    
+                    // Update the dashboard canteen icon with the actual image from database
+                    const canteenIconImg = document.getElementById('canteenIconImg');
+                    if (canteenIconImg && canteenData.imagePath) {
+                        canteenIconImg.src = canteenData.imagePath;
+                    }
+                    
+                    // Update the success message canteen name
+                    if (alertCanteenName) {
+                        alertCanteenName.textContent = canteenData.name;
+                    }
+                }
+                
+                console.log('Authentication successful');
+            } else {
+                // Show error
+                const authWarning = document.getElementById('authWarning');
+                const authWarningText = document.getElementById('authWarningText');
+                const authCodeInput = document.getElementById('authCode');
+                
+                if (authWarning) {
+                    authWarning.style.display = 'block';
+                }
+                
+                if (authWarningText) {
+                    authWarningText.textContent = 'Invalid authentication code. Please try again.';
+                }
+                
+                if (authCodeInput) {
+                    authCodeInput.classList.add('is-invalid');
+                }
+                
+                console.log('Authentication failed');
+            }
+        });
+    </script>
+    <script>
+        // Canteen selection
+        const canteenCards = document.querySelectorAll('.canteen-card');
+        const authCanteenLogo = document.getElementById('authCanteenLogo');
+        const authCanteenName = document.getElementById('authCanteenName');
+        const authSubmit = document.getElementById('authSubmit');
+        const authCode = document.getElementById('authCode');
+        const ordersManagement = document.getElementById('ordersManagement');
+        const canteenTitle = document.getElementById('canteenTitle');
+        
+        // Using the global canteenCodes object
+        
+        // We're using the global selectedCanteen variable
+        
+        // Using the global registerCanteenCode function
+        
+        // Handle canteen selection
+        canteenCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove selected class from all cards
+                canteenCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                card.classList.add('selected');
+                
+                // Store selected canteen ID
+                selectedCanteen = card.id;
+                
+                // Update auth modal
+                const canteenName = card.querySelector('h5').textContent;
+                const canteenLogo = card.querySelector('img').src;
+                
+                authCanteenLogo.src = canteenLogo;
+                authCanteenName.textContent = canteenName;
+            });
+        });
+        
+        // Canteen-specific order data (in a real app, this would come from a database)
+        const canteenOrderData = {
+            'canteen1': { // Big Mingoes
+                pending: 8,
+                preparing: 3,
+                ready: 5,
+                cancelled: 1,
+                orders: {
+                    pending: [
+                        {id: '#ORD-2023', customer: 'Alice Johnson', items: ['1x Chicken Burger', '1x French Fries', '1x Coke'], total: '₹250', time: 'Just now'},
+                        {id: '#ORD-2022', customer: 'Bob Smith', items: ['2x Veg Sandwich', '2x Mango Juice'], total: '₹180', time: '5 mins ago'}
+                    ],
+                    preparing: [
+                        {id: '#ORD-2020', customer: 'David Wilson', items: ['1x Paneer Tikka', '2x Butter Naan', '1x Lassi'], total: '₹350', time: '15 mins ago'}
+                    ],
+                    ready: [
+                        {id: '#ORD-2018', customer: 'Frank Thomas', items: ['1x Chicken Fried Rice', '1x Manchurian'], total: '₹220', time: '5 mins ago'}
+                    ],
+                    completed: [
+                        {id: '#ORD-2016', customer: 'Henry Garcia', items: ['1x Veg Pulao', '1x Sweet Lassi'], total: '₹150', time: '1 hour ago', status: 'Not Picked Up'}
+                    ]
+                }
+            },
+            'canteen2': { // Small Mingoes
+                pending: 5,
+                preparing: 2,
+                ready: 3,
+                cancelled: 0,
+                orders: {
+                    pending: [
+                        {id: '#ORD-2021', customer: 'Charlie Brown', items: ['1x Masala Dosa', '1x Filter Coffee'], total: '₹120', time: '10 mins ago'}
+                    ],
+                    preparing: [
+                        {id: '#ORD-2019', customer: 'Eva Martinez', items: ['1x Veg Biryani', '1x Raita'], total: '₹180', time: '20 mins ago'}
+                    ],
+                    ready: [
+                        {id: '#ORD-2017', customer: 'Grace Lee', items: ['2x Samosa', '1x Tea'], total: '₹80', time: '15 mins ago'}
+                    ],
+                    completed: [
+                        {id: '#ORD-2015', customer: 'Ivy Robinson', items: ['1x Veg Burger', '1x French Fries'], total: '₹180', time: '2 hours ago', status: 'Cancelled'}
+                    ]
+                }
+            },
+            'canteen3': { // M M Foods
+                pending: 3,
+                preparing: 1,
+                ready: 2,
+                cancelled: 1,
+                orders: {
+                    pending: [
+                        {id: '#ORD-2024', customer: 'Jack Williams', items: ['1x Hakka Noodles', '1x Spring Rolls'], total: '₹200', time: '3 mins ago'}
+                    ],
+                    preparing: [
+                        {id: '#ORD-2025', customer: 'Karen Davis', items: ['1x Schezwan Rice', '1x Manchow Soup'], total: '₹220', time: '10 mins ago'}
+                    ],
+                    ready: [
+                        {id: '#ORD-2026', customer: 'Leo Martin', items: ['1x Chilli Paneer', '2x Garlic Naan'], total: '₹250', time: '8 mins ago'}
+                    ],
+                    completed: [
+                        {id: '#ORD-2027', customer: 'Mia Thompson', items: ['1x Veg Fried Rice', '1x Gobi Manchurian'], total: '₹190', time: '45 mins ago', status: 'Cancelled'}
+                    ]
+                }
+            }
+        };
+        
+        // Function to update order tables based on selected canteen
+        function updateOrderTables(canteenId) {
+            const data = canteenOrderData[canteenId];
+            if (!data) return;
+            
+            // Update dashboard stats
+            document.getElementById('pendingOrderCount').textContent = data.pending;
+            document.getElementById('preparingOrderCount').textContent = data.preparing;
+            document.getElementById('readyOrderCount').textContent = data.ready;
+            document.getElementById('cancelledOrderCount').textContent = data.cancelled;
+            
+            // Update tab badges
+            document.querySelector('#pending-tab .badge').textContent = data.pending;
+            document.querySelector('#preparing-tab .badge').textContent = data.preparing;
+            document.querySelector('#ready-tab .badge').textContent = data.ready;
+            document.querySelector('#completed-tab .badge').textContent = data.completed ? data.completed.length : 0;
+            
+            // Clear existing table rows
+            document.querySelector('#pending table tbody').innerHTML = '';
+            document.querySelector('#preparing table tbody').innerHTML = '';
+            document.querySelector('#ready table tbody').innerHTML = '';
+            document.querySelector('#completed table tbody').innerHTML = '';
+            
+            // Populate pending orders
+            const pendingTable = document.querySelector('#pending table tbody');
+            data.orders.pending.forEach(order => {
+                const row = document.createElement('tr');
+                if (order.time === 'Just now') row.classList.add('new-order');
+                
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                    <td>${order.total}</td>
+                    <td>${order.time}</td>
+                    <td><span class="status-badge pending">Pending</span></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm action-btn">Start Preparing</button>
+                        <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                    </td>
+                `;
+                pendingTable.appendChild(row);
+            });
+            
+            // Populate preparing orders
+            const preparingTable = document.querySelector('#preparing table tbody');
+            data.orders.preparing.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                    <td>${order.total}</td>
+                    <td>${order.time}</td>
+                    <td><span class="status-badge preparing">Preparing</span></td>
+                    <td>
+                        <button class="btn btn-success btn-sm action-btn">Mark Ready</button>
+                        <button class="btn btn-danger btn-sm action-btn">Cancel</button>
+                    </td>
+                `;
+                preparingTable.appendChild(row);
+            });
+            
+            // Populate ready orders
+            const readyTable = document.querySelector('#ready table tbody');
+            data.orders.ready.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                    <td>${order.total}</td>
+                    <td>${order.time}</td>
+                    <td><span class="status-badge ready">Ready</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm action-btn">Mark Picked Up</button>
+                        <button class="btn btn-secondary btn-sm action-btn">Not Picked Up</button>
+                    </td>
+                `;
+                readyTable.appendChild(row);
+            });
+            
+            // Populate completed/cancelled orders
+            const completedTable = document.querySelector('#completed table tbody');
+            if (data.orders.completed) {
+                data.orders.completed.forEach(order => {
+                    const statusClass = order.status === 'Cancelled' ? 'cancelled' : 'not-picked';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order.id}</td>
+                        <td>${order.customer}</td>
+                        <td>${order.items.map(item => `<div>${item}</div>`).join('')}</td>
+                        <td>${order.total}</td>
+                        <td>${order.time}</td>
+                        <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                    `;
+                    completedTable.appendChild(row);
+                });
+            }
+        }
+        
+        // Handle authentication
+        authSubmit.addEventListener('click', () => {
+            const authWarning = document.getElementById('authWarning');
+            const authWarningText = document.getElementById('authWarningText');
+            
+            // Hide any previous warnings
+            authWarning.style.display = 'none';
+            
+            if (!selectedCanteen) {
+                authWarning.style.display = 'block';
+                authWarningText.textContent = 'Please select a canteen before authenticating.';
+                return;
+            }
+            
+            const enteredCode = authCode.value.trim();
+            const correctCode = canteenCodes[selectedCanteen];
+            
+            console.log(`Authentication attempt: entered "${enteredCode}", expected "${correctCode}" for ${selectedCanteen}`);
+            
+            // For demo purposes, if the codes array is empty, accept any non-empty code
+            if (!correctCode && enteredCode) {
+                console.warn("No registered code found for this canteen. In demo mode, accepting any non-empty code.");
+            }
+            
+            if (enteredCode === correctCode || (!correctCode && enteredCode)) {
+                // Authentication successful
+                console.log("Authentication successful for canteen: " + selectedCanteen);
+                
+                // Hide the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+                modal.hide();
+                
+                // Get the selected canteen data
+                const canteenData = JSON.parse(localStorage.getItem('selectedCanteen'));
+                console.log("Authentication successful for:", canteenData);
+                
+                // Set canteen icon based on ID
+                let iconSrc = "";
+                if (selectedCanteen === 'canteen1') {
+                    iconSrc = "https://img.icons8.com/color/96/000000/restaurant-building.png";
+                } else if (selectedCanteen === 'canteen2') {
+                    iconSrc = "https://img.icons8.com/color/96/000000/cafe.png";
+                } else {
+                    iconSrc = "https://img.icons8.com/color/96/000000/food-truck.png";
+                }
+                
+                document.getElementById('canteenIconImg').src = iconSrc;
+                
+                // Show dashboard with animation
+                setTimeout(() => {
+                    // Hide welcome and selector
+                    document.getElementById('welcomeMessage').style.display = 'none';
+                    document.getElementById('canteenSelector').style.display = 'none';
+                    
+                    // Update dashboard info
+                    document.getElementById('selectedCanteenName').textContent = canteenData.name;
+                    document.getElementById('selectedCanteenLocation').textContent = canteenData.location;
+                    document.getElementById('alertCanteenName').textContent = canteenData.name;
+                    
+                    // Show dashboard elements with smooth animation
+                    document.getElementById('selectedCanteenInfo').style.display = 'block';
+                    document.getElementById('dashboardStats').style.display = 'flex';
+                    
+                    // Update step indicator in top menu
+                    updateStepIndicator(3);
+                    
+                    // Load dashboard data
+                    loadDashboardData(selectedCanteen);
+                }, 300);
+                
+                // Update canteen title
+                const canteenName = document.querySelector(`#${selectedCanteen} h5`).textContent;
+                canteenTitle.textContent = `${canteenName} - Orders Management`;
+                
+                // Update order tables with canteen-specific data
+                updateOrderTables(selectedCanteen);
+                
+                // Scroll to dashboard stats
+                document.getElementById('dashboardStats').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // Authentication failed
+                authCode.classList.add('is-invalid');
+                authWarning.style.display = 'block';
+                authWarningText.textContent = 'Invalid authentication code. Please try again or contact your manager.';
+                
+                setTimeout(() => {
+                    authCode.classList.remove('is-invalid');
+                }, 3000);
+            }
+        });
+        
+        // Clear validation on input
+        authCode.addEventListener('input', () => {
+            authCode.classList.remove('is-invalid');
+        });
+        
+        // Sidebar code removed as requested
+        
+        // Order status update buttons
+        document.addEventListener('click', function(e) {
+            // Start preparing button
+            if (e.target.classList.contains('btn-warning') && e.target.textContent.includes('Start Preparing')) {
+                const row = e.target.closest('tr');
+                const statusCell = row.querySelector('.status-badge');
+                statusCell.className = 'status-badge preparing';
+                statusCell.textContent = 'Preparing';
+                
+                // Move to preparing tab
+                const preparingTab = document.getElementById('preparing-tab');
+                preparingTab.click();
+                
+                // Update buttons
+                e.target.textContent = 'Mark Ready';
+                e.target.classList.remove('btn-warning');
+                e.target.classList.add('btn-success');
+            }
+            
+            // Mark ready button
+            else if (e.target.classList.contains('btn-success') && e.target.textContent.includes('Mark Ready')) {
+                const row = e.target.closest('tr');
+                const statusCell = row.querySelector('.status-badge');
+                statusCell.className = 'status-badge ready';
+                statusCell.textContent = 'Ready';
+                
+                // Move to ready tab
+                const readyTab = document.getElementById('ready-tab');
+                readyTab.click();
+                
+                // Update buttons
+                e.target.textContent = 'Mark Picked Up';
+                e.target.classList.remove('btn-success');
+                e.target.classList.add('btn-primary');
+                
+                const cancelBtn = row.querySelector('.btn-danger');
+                cancelBtn.textContent = 'Not Picked Up';
+                cancelBtn.classList.remove('btn-danger');
+                cancelBtn.classList.add('btn-secondary');
+            }
+            
+            // Mark picked up button
+            else if (e.target.classList.contains('btn-primary') && e.target.textContent.includes('Mark Picked Up')) {
+                const row = e.target.closest('tr');
+                
+                // Move to completed tab
+                const completedTab = document.getElementById('completed-tab');
+                completedTab.click();
+                
+                // Remove row from current tab and add to completed
+                const completedTable = document.querySelector('#completed table tbody');
+                const newRow = row.cloneNode(true);
+                
+                // Update status
+                const statusCell = newRow.querySelector('.status-badge');
+                statusCell.className = 'status-badge';
+                statusCell.textContent = 'Completed';
+                
+                // Remove action buttons
+                const actionCell = newRow.querySelector('td:last-child');
+                actionCell.remove();
+                
+                // Add to completed table
+                completedTable.prepend(newRow);
+                row.remove();
+            }
+            
+            // Not picked up button
+            else if (e.target.classList.contains('btn-secondary') && e.target.textContent.includes('Not Picked Up')) {
+                const row = e.target.closest('tr');
+                
+                // Move to completed tab
+                const completedTab = document.getElementById('completed-tab');
+                completedTab.click();
+                
+                // Remove row from current tab and add to completed
+                const completedTable = document.querySelector('#completed table tbody');
+                const newRow = row.cloneNode(true);
+                
+                // Update status
+                const statusCell = newRow.querySelector('.status-badge');
+                statusCell.className = 'status-badge not-picked';
+                statusCell.textContent = 'Not Picked Up';
+                
+                // Remove action buttons
+                const actionCell = newRow.querySelector('td:last-child');
+                actionCell.remove();
+                
+                // Add to completed table
+                completedTable.prepend(newRow);
+                row.remove();
+            }
+            
+            // Cancel button
+            else if (e.target.classList.contains('btn-danger') && e.target.textContent.includes('Cancel')) {
+                const row = e.target.closest('tr');
+                
+                // Move to completed tab
+                const completedTab = document.getElementById('completed-tab');
+                completedTab.click();
+                
+                // Remove row from current tab and add to completed
+                const completedTable = document.querySelector('#completed table tbody');
+                const newRow = row.cloneNode(true);
+                
+                // Update status
+                const statusCell = newRow.querySelector('.status-badge');
+                statusCell.className = 'status-badge cancelled';
+                statusCell.textContent = 'Cancelled';
+                
+                // Remove action buttons
+                const actionCell = newRow.querySelector('td:last-child');
+                actionCell.remove();
+                
+                // Add to completed table
+                completedTable.prepend(newRow);
+                row.remove();
+            }
+        });
+        
+        // Inventory toggle switches
+        const inventorySwitches = document.querySelectorAll('.inventory-item .form-check-input');
+        
+        inventorySwitches.forEach(switchEl => {
+            switchEl.addEventListener('change', function() {
+                const itemName = this.closest('.inventory-item').querySelector('h5').textContent;
+                const status = this.checked ? 'available' : 'unavailable';
+                
+                // In a real app, this would update the database
+                console.log(`${itemName} is now ${status}`);
+                
+                // Update label
+                const label = this.nextElementSibling;
+                label.textContent = this.checked ? 'Available' : 'Unavailable';
+            });
+        });
+        
+        // Logout function is defined at the top of the script
+        
+        // Initialize welcome name
+        function initializeWelcomeName() {
+            const userData = localStorage.getItem('canteenUserData');
+            if (userData) {
+                const user = JSON.parse(userData);
+                // Update welcome-name if it exists
+                const welcomeNameElement = document.getElementById('welcome-name');
+                if (welcomeNameElement) {
+                    welcomeNameElement.textContent = user.fullName || 'Staff Member';
+                }
+                
+                // Also update staff-name in the header
+                const staffNameElement = document.getElementById('staff-name');
+                if (staffNameElement) {
+                    staffNameElement.textContent = user.fullName || 'Staff Member';
+                    console.log('Set staff name to:', user.fullName);
+                }
+                
+                // Update staff role if needed
+                const staffRoleElement = document.getElementById('staff-role');
+                if (staffRoleElement && user.accountType) {
+                    if (user.accountType.toLowerCase() === 'admin') {
+                        staffRoleElement.textContent = 'Administrator';
+                        staffRoleElement.style.backgroundColor = '#dc3545'; // Red for admin
+                    } else {
+                        staffRoleElement.textContent = 'Kitchen Staff';
+                        // Keep the orange color from CSS for kitchen staff
+                    }
+                }
+            }
+            
+            // Make sure dashboard is hidden until canteen is selected
+            const dashboardStats = document.getElementById('dashboardStats');
+            if (dashboardStats) {
+                dashboardStats.style.display = 'none';
+            }
+            
+            // We no longer auto-select canteens on page load
+            // Clear any previous canteen selection from localStorage
+            localStorage.removeItem('selectedCanteen');
+        }
+        
+        // Function to select a canteen and show the dashboard
+        function selectCanteen(id, name, location, iconSrc) {
+            console.log(`Selecting canteen: ${id} - ${name}`);
+            
+            // Store the selection including the canteen image
+            localStorage.setItem('selectedCanteen', JSON.stringify({
+                id: id,
+                name: name,
+                location: location,
+                imagePath: iconSrc
+            }));
+            
+            // Set the selected canteen ID for authentication
+            selectedCanteen = id;
+            
+            // Update step indicator
+            updateStepIndicator(2);
+            
+            // Highlight the selected canteen card
+            document.querySelectorAll('.canteen-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.id === id) {
+                    card.classList.add('selected');
+                }
+            });
+            
+            // Update the modal with canteen information
+            document.getElementById('authModalLabel').textContent = `Authenticate for ${name}`;
+            document.getElementById('authCanteenName').textContent = name;
+            
+            // Reset any previous authentication errors
+            const authWarning = document.getElementById('authWarning');
+            authWarning.style.display = 'none';
+            document.getElementById('authCode').classList.remove('is-invalid');
+            document.getElementById('authCode').value = ''; // Clear previous entry
+            
+            // Update the modal logo
+            document.getElementById('authCanteenLogo').src = iconSrc;
+            
+            // Show the authentication modal with a slight delay for better UX
+            setTimeout(() => {
+                const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+                authModal.show();
+            }, 300);
+            
+            // Highlight the selected canteen card
+            const canteenCards = document.querySelectorAll('.canteen-card');
+            canteenCards.forEach(card => {
+                card.classList.remove('selected');
+                if (parseInt(card.getAttribute('data-canteen-id')) === id) {
+                    card.classList.add('selected');
+                }
+            });
+            
+            // Load canteen data (simulated)
+            setTimeout(() => {
+                // Show the dashboard after a short delay (simulating loading)
+                document.getElementById('dashboardStats').style.display = 'flex';
+                
+                // Update order counts (simulated data)
+                document.getElementById('pendingOrderCount').textContent = Math.floor(Math.random() * 10);
+                document.getElementById('preparingOrderCount').textContent = Math.floor(Math.random() * 5);
+                document.getElementById('readyOrderCount').textContent = Math.floor(Math.random() * 8);
+                document.getElementById('completedOrderCount').textContent = Math.floor(Math.random() * 20);
+                
+                // Show orders table
+                const ordersTable = document.getElementById('ordersTable');
+                if (ordersTable) {
+                    ordersTable.style.display = 'block';
+                }
+                
+                console.log('Dashboard loaded for canteen:', name);
+            }, 500);
+        }
+        
+        // Function to update step indicator
+        function updateStepIndicator(activeStep) {
+            const steps = document.querySelectorAll('.step');
+            const connectors = document.querySelectorAll('.step-connector');
+            
+            steps.forEach((step, index) => {
+                if (index < activeStep) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+            
+            connectors.forEach((connector, index) => {
+                if (index < activeStep - 1) {
+                    connector.classList.add('active');
+                } else {
+                    connector.classList.remove('active');
+                }
+            });
+        }
+        
+        // Function to load dashboard data
+        function loadDashboardData(canteenId) {
+            console.log("Loading dashboard data for canteen:", canteenId);
+            
+            // In a real application, this would make an API call to fetch data
+            // For now, we'll just use some sample data
+            
+            // Sample order counts by status
+            let orderCounts;
+            
+            if (canteenId === 'canteen1') {
+                orderCounts = {
+                    pending: 18,
+                    preparing: 5,
+                    ready: 12,
+                    total: '$1,258.90'
+                };
+            } else if (canteenId === 'canteen2') {
+                orderCounts = {
+                    pending: 10,
+                    preparing: 3,
+                    ready: 8,
+                    total: '$876.50'
+                };
+            } else {
+                orderCounts = {
+                    pending: 15,
+                    preparing: 7,
+                    ready: 4,
+                    total: '$943.25'
+                };
+            }
+            
+            // Update the dashboard stats
+            document.getElementById('pendingOrderCount').textContent = orderCounts.pending;
+            document.getElementById('preparingOrderCount').textContent = orderCounts.preparing;
+            document.getElementById('readyOrderCount').textContent = orderCounts.ready;
+            document.getElementById('todaysTotalValue').textContent = orderCounts.total;
+            
+            // Update tab counts
+            document.getElementById('pendingTabCount').textContent = orderCounts.pending;
+            document.getElementById('preparingTabCount').textContent = orderCounts.preparing;
+            document.getElementById('readyTabCount').textContent = orderCounts.ready;
+            
+            // In a real app, you would also load the orders table data here
+        }
+        
+        // Function to change canteen
+        function changeCanteen() {
+            // Hide the dashboard and selected canteen info
+            document.getElementById('dashboardStats').style.display = 'none';
+            document.getElementById('selectedCanteenInfo').style.display = 'none';
+            
+            // Show the canteen selector and welcome message
+            document.getElementById('canteenSelector').style.display = 'block';
+            document.getElementById('welcomeMessage').style.display = 'block';
+            
+            // Reset step indicator
+            updateStepIndicator(1);
+            
+            // Hide orders table
+            const ordersTable = document.getElementById('ordersTable');
+            if (ordersTable) {
+                ordersTable.style.display = 'none';
+            }
+        }
+    </script>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Campus Cravings</h3>
+                <p>Your smart solution for effortless campus dining!</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <nav aria-label="Footer Navigation">
+                    <ul>
+                        <li><a href="Main.html">Home</a></li>
+                        <li><a href="staffs.html">Staff Portal</a></li>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <address>
+                    <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Campus Building, University Road</p>
+                    <p><i class="fas fa-phone" aria-hidden="true"></i> <a href="tel:+12345678900" class="footer-contact-link">+1 234 567 8900</a></p>
+                    <p><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:info@campuscravings.com" class="footer-contact-link">info@campuscravings.com</a></p>
+                </address>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Campus Cravings. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Add footer styles -->
+    <style>
+        .footer {
+            background: white; /* Changed to white as requested */
+            color: #4a4a4a; /* Darker text for better contrast on white background */
+            padding: 40px 0 20px;
+            margin-top: 50px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05); /* Light shadow to separate footer */
+        }
+        
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 20px;
+            padding: 0 15px;
+        }
+        
+        .footer-section h3 {
+            color: #8e5a2b; /* Darker brown to complement the light orange */
+            margin-bottom: 15px;
+            font-size: 18px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 2px;
+            background-color: #b27b3d; /* Medium brown for accent */
+        }
+        
+        .footer-section p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 8px;
+        }
+        
+        .footer-section ul li a {
+            color: #5d4b36; /* Dark brown for better readability */
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #b27b3d; /* Medium brown on hover */
+        }
+        
+        .footer-section i {
+            margin-right: 10px;
+            color: #8e5a2b; /* Dark brown for icons */
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #ffffff; /* Changed to white */
+            color: #efa52c; /* Changed to theme color for contrast */
+            transition: all 0.3s;
+        }
+        
+        .social-icons a:hover {
+            background-color: #f8f9fa; /* Light gray on hover */
+            color: #b27b3d; /* Darker brown on hover */
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid #b27b3d; /* Medium brown */
+            font-size: 14px;
+            color: #5d4b36; /* Dark brown */
+        }
+        
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+            }
+            
+            .footer-section {
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</body>
+</html>

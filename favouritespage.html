@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings | Campus Canteen</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      transition: all 0.3s ease;
+    }
+    
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 15px 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .left-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .dashboard-toggle {
+      color: white;
+      cursor: pointer;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .account-type-badge {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .cart-count {
+      background-color: var(--accent-color);
+      color: white;
+      border-radius: 50%;
+      padding: 1px 6px;
+      font-size: 12px;
+      position: relative;
+      top: -10px;
+      right: 5px;
+    }
+    
+    .logout-btn {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+    
+    /* Dashboard Menu Styles */
+    .dashboard-menu {
+      position: fixed;
+      left: -300px;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background-color: white;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+    }
+    
+    .dashboard-menu.show {
+      left: 0;
+    }
+    
+    .dashboard-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .close-dashboard {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    
+    .dashboard-user-info {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .dashboard-user-avatar i {
+      font-size: 3rem;
+      color: var(--secondary-color);
+      margin-right: 15px;
+    }
+    
+    .dashboard-user-name {
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+    
+    .dashboard-user-type {
+      font-size: 0.8rem;
+      color: #777;
+    }
+    
+    .dashboard-menu-content {
+      padding: 15px 0;
+    }
+    
+    .dashboard-menu-content a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .dashboard-menu-content a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .dashboard-menu-content a:hover {
+      background-color: #f5f5f5;
+      color: var(--secondary-color);
+    }
+    
+    .dashboard-menu-content .active-menu-item {
+      background-color: #e3f2fd;
+      color: var(--secondary-color);
+      border-left: 3px solid var(--secondary-color);
+    }
+    
+    .dashboard-footer {
+      padding: 15px 0;
+      border-top: 1px solid #eee;
+    }
+    
+    .dashboard-footer a {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .dashboard-footer a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .dashboard-footer a:hover {
+      background-color: #f5f5f5;
+      color: var(--secondary-color);
+    }
+    
+    /* Main Content Styles */
+    .main-content {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: flex;
+      gap: 30px;
+    }
+    
+    /* Settings Page Styles */
+    .settings-container {
+      flex: 1;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+    }
+    
+    .settings-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .settings-header h2 {
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .settings-header h2 i {
+      color: var(--secondary-color);
+    }
+    
+    .settings-tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    
+    .settings-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .settings-tab.active {
+      border-bottom-color: var(--secondary-color);
+      color: var(--secondary-color);
+      font-weight: bold;
+    }
+    
+    .settings-tab:hover:not(.active) {
+      background-color: #f5f5f5;
+    }
+    
+    .settings-content {
+      display: none;
+    }
+    
+    .settings-content.active {
+      display: block;
+    }
+    
+    .settings-section {
+      margin-bottom: 30px;
+    }
+    
+    .settings-section h3 {
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .settings-section h3 i {
+      color: var(--secondary-color);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+      border-color: var(--secondary-color);
+      outline: none;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+    
+    .notification-settings .form-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--success-color);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .privacy-settings .privacy-option {
+      margin-bottom: 15px;
+    }
+    
+    .privacy-option label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    
+    .privacy-option input[type="radio"] {
+      accent-color: var(--secondary-color);
+    }
+    
+    .delete-account {
+      background-color: #fff8f8;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ffdddd;
+    }
+    
+    /* Overlay for dashboard */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+    
+    .overlay.show {
+      display: block;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+      }
+      
+      .dashboard-menu {
+        width: 250px;
+      }
+      
+      .settings-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Your existing header and dashboard code here -->
+  <header>
+    <div class="header-content">
+      <!-- Dashboard toggle on the left -->
+      <div class="left-header">
+        <a href="javascript:void(0);" onclick="toggleDashboard()" title="Dashboard" class="dashboard-toggle">
+          <i class="fas fa-bars fa-lg"></i>
+        </a>
+        <h1>Campus Canteen Pre-Order System</h1>
+      </div>
+      
+      <div class="user-profile">
+        <span id="userName">Welcome!</span>
+        <div id="accountTypeDisplay" class="account-type-badge"></div>
+        <!-- TOP RIGHT ICONS -->
+        <a href="Main.html" title="Home"><i class="fas fa-home fa-lg"></i></a>
+        <a href="orderhistory.html" title="My Orders"><i class="fas fa-list fa-lg"></i></a>
+        <a href="cart.html" title="Cart">
+          <i class="fas fa-shopping-cart fa-lg"></i>
+          <span class="cart-count">0</span>
+        </a>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Menu (Left Side) -->
+  <div id="dashboardMenu" class="dashboard-menu">
+    <div class="dashboard-menu-header">
+      <h3>Customer Dashboard</h3>
+      <button class="close-dashboard" onclick="toggleDashboard()"><i class="fas fa-times"></i></button>
+    </div>
+    
+    <!-- User info section in dashboard -->
+    <div class="dashboard-user-info">
+      <div class="dashboard-user-avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="dashboard-user-details">
+        <div class="dashboard-user-name" id="dashboardUserName">User Name</div>
+        <div class="dashboard-user-type" id="dashboardUserType">Customer</div>
+      </div>
+    </div>
+    
+    <div class="dashboard-menu-content">
+      <a href="Main.html"><i class="fas fa-home"></i> Home</a>
+      <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+      <a href="orderhistory.html"><i class="fas fa-list"></i> My Orders</a>
+      <a id="trackOrderBtn" href="delivery.html" class="dashboard-menu-item">
+        <i class="fas fa-truck"></i> Track Current Order
+      </a>
+      <a href="favorites.html"><i class="fas fa-heart"></i> Favorites</a>
+      <a href="settings.html" class="active-menu-item"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+    
+    <!-- Footer section in dashboard -->
+    <div class="dashboard-footer">
+      <a href="help.html"><i class="fas fa-question-circle"></i> Help & Support</a>
+      <a href="javascript:void(0);" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+  
+  <!-- Overlay for dashboard -->
+  <div id="overlay" class="overlay" onclick="toggleDashboard()"></div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Settings Container -->
+    <div class="settings-container">
+      <div class="settings-header">
+        <h2><i class="fas fa-cog"></i> Settings</h2>
+        <p>Manage your account preferences and security settings</p>
+      </div>
+      
+      <div class="settings-tabs">
+        <div class="settings-tab active" onclick="openTab(event, 'account-tab')">Account</div>
+        <div class="settings-tab" onclick="openTab(event, 'notifications-tab')">Notifications</div>
+        <div class="settings-tab" onclick="openTab(event, 'privacy-tab')">Privacy</div>
+        <div class="settings-tab" onclick="openTab(event, 'security-tab')">Security</div>
+      </div>
+      
+      <!-- Account Settings -->
+      <div id="account-tab" class="settings-content active">
+        <div class="settings-section">
+          <h3><i class="fas fa-user-circle"></i> Profile Information</h3>
+          <form id="profileForm">
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+              <input type="text" id="fullName" class="form-control" value="John Doe">
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" class="form-control" value="john.doe@example.com">
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" class="form-control" value="+1 (555) 123-4567">
+            </div>
+            <div class="form-group">
+              <label for="studentId">Student ID</label>
+              <input type="text" id="studentId" class="form-control" value="S12345678" disabled>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+          </form>
+        </div>
+        
+        <div class="settings-section">
+          <h3><i class="fas fa-map-marker-alt"></i> Delivery Preferences</h3>
+          <form id="deliveryForm">
+            <div class="form-group">
+              <label for="defaultLocation">Default Pickup Location</label>
+              <select id="defaultLocation" class="form-control">
+                <option value="main_campus">Main Campus Canteen</option>
+                <option value="north_campus" selected>North Campus Food Court</option>
+                <option value="library_cafe">Library Café</option>
+                <option value="sports_complex">Sports Complex Snack Bar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="deliveryInstructions">Special Instructions</label>
+              <textarea id="deliveryInstructions" class="form-control" rows="3" placeholder="Any special instructions for delivery...">Please keep the food warm</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Preferences</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Notification Settings -->
+      <div id="notifications-tab" class="settings-content">
+        <div class="settings-section">
+          <h3><i class="fas fa-bell"></i> Notification Preferences</h3>
+          <form id="notificationForm" class="notification-settings">
+            <div class="form-group">
+              <label for="orderNotifications">Order Status Updates</label>
+              <label class="switch">
+                <input type="checkbox" id="orderNotifications" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="promoNotifications">Promotions & Offers</label>
+              <label class="switch">
+                <input type="checkbox" id="promoNotifications" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="newsletter">Monthly Newsletter</label>
+              <label class="switch">
+                <input type="checkbox" id="newsletter">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="notificationSound">Notification Sound</label>
+              <label class="switch">
+                <input type="checkbox" id="notificationSound" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="notificationMethod">Preferred Notification Method</label>
+              <select id="notificationMethod" class="form-control">
+                <option value="email">Email</option>
+                <option value="sms" selected>SMS Text Message</option>
+                <option value="both">Both Email and SMS</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Notification Settings</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Privacy Settings -->
+      <div id="privacy-tab" class="settings-content">
+        <div class="settings-section">
+          <h3><i class="fas fa-lock"></i> Privacy Settings</h3>
+          <form id="privacyForm" class="privacy-settings">
+            <div class="form-group">
+              <label>Order History Visibility</label>
+              <div class="privacy-option">
+                <label>
+                  <input type="radio" name="orderHistory" value="public" checked>
+                  <span>Show my order history to canteen staff</span>
+                </label>
+              </div>
+              <div class="privacy-option">
+                <label>
+                  <input type="radio" name="orderHistory" value="private">
+                  <span>Keep my order history private</span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Personal Information</label>
+              <div class="privacy-option">
+                <label>
+                  <input type="radio" name="personalInfo" value="basic" checked>
+                  <span>Share only basic information (name, student ID)</span>
+                </label>
+              </div>
+              <div class="privacy-option">
+                <label>
+                  <input type="radio" name="personalInfo" value="contact">
+                  <span>Share contact information (email, phone) for order updates</span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="dataSharing">Data Sharing for Analytics</label>
+              <label class="switch">
+                <input type="checkbox" id="dataSharing">
+                <span class="slider"></span>
+              </label>
+              <small class="text-muted">Help improve our service by sharing anonymous usage data</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save Privacy Settings</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Security Settings -->
+      <div id="security-tab" class="settings-content">
+        <div class="settings-section">
+          <h3><i class="fas fa-shield-alt"></i> Account Security</h3>
+          <form id="securityForm">
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" class="form-control" placeholder="Enter your current password">
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password">
+            </div>
+            <button type="submit" class="btn btn-primary">Change Password</button>
+          </form>
+        </div>
+        
+        <div class="settings-section">
+          <h3><i class="fas fa-sign-in-alt"></i> Login Security</h3>
+          <div class="form-group">
+            <label for="twoFactorAuth">Two-Factor Authentication</label>
+            <label class="switch">
+              <input type="checkbox" id="twoFactorAuth">
+              <span class="slider"></span>
+            </label>
+            <small>Add an extra layer of security to your account</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="trustedDevices">Trusted Devices</label>
+            <select id="trustedDevices" class="form-control">
+              <option>iPhone 13 (Last login: Today 10:30 AM)</option>
+              <option>MacBook Pro (Last login: Yesterday 2:15 PM)</option>
+            </select>
+            <button type="button" class="btn btn-danger" style="margin-top: 10px;">Remove Selected Device</button>
+          </div>
+        </div>
+        
+        <div class="settings-section delete-account">
+          <h3><i class="fas fa-exclamation-triangle"></i> Delete Account</h3>
+          <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
+          <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">Delete My Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dashboard toggle functionality
+    function toggleDashboard() {
+      const dashboard = document.getElementById('dashboardMenu');
+      const overlay = document.getElementById('overlay');
+      dashboard.classList.toggle('show');
+      overlay.classList.toggle('show');
+    }
+    
+    // Tab switching functionality
+    function openTab(evt, tabName) {
+      const tabContents = document.getElementsByClassName('settings-content');
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove('active');
+      }
+      
+      const tabLinks = document.getElementsByClassName('settings-tab');
+      for (let i = 0; i < tabLinks.length; i++) {
+        tabLinks[i].classList.remove('active');
+      }
+      
+      document.getElementById(tabName).classList.add('active');
+      evt.currentTarget.classList.add('active');
+    }
+    
+    // Form submission handlers
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Profile updated successfully!');
+    });
+    
+    document.getElementById('deliveryForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Delivery preferences saved!');
+    });
+    
+    document.getElementById('notificationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Notification settings updated!');
+    });
+    
+    document.getElementById('privacyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Privacy settings saved!');
+    });
+    
+    document.getElementById('securityForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Password changed successfully!');
+    });
+    
+    // Delete account confirmation
+    function confirmDeleteAccount() {
+      if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+        alert('Account deletion request received. We\'re sorry to see you go!');
+        // In a real app, this would trigger an account deletion process
+      }
+    }
+    
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        window.location.href = 'login.html';
+      }
+    }
+    
+    // Initialize user data
+    window.onload = function() {
+      // In a real app, you would fetch this from your backend
+      document.getElementById('userName').textContent = 'Welcome, John!';
+      document.getElementById('accountTypeDisplay').textContent = 'Student';
+      document.getElementById('dashboardUserName').textContent = 'John Doe';
+      document.getElementById('dashboardUserType').textContent = 'Student Account';
+    };
+  </script>
+</body>
+</html>

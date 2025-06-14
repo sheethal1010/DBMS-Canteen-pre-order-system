@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Registered Users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .user-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .user-card:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .user-property {
+            margin-bottom: 5px;
+        }
+        .property-name {
+            font-weight: bold;
+            display: inline-block;
+            width: 150px;
+        }
+        .employee-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #e6f7ff;
+        }
+        .employee-card:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .refresh-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .refresh-btn:hover {
+            background-color: #45a049;
+        }
+        .btn-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>College Canteen - Registered Users</h1>
+        
+        <div class="btn-container">
+            <button id="refreshBtn" class="refresh-btn">Refresh Data</button>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">Recently Registered Users</h2>
+            <div id="usersContainer">
+                <div class="loading">Loading users data...</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">Employee Details</h2>
+            <div id="employeesContainer">
+                <div class="loading">Loading employees data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchData();
+            
+            document.getElementById('refreshBtn').addEventListener('click', fetchData);
+        });
+        
+        function fetchData() {
+            // Show loading indicators
+            document.getElementById('usersContainer').innerHTML = '<div class="loading">Loading users data...</div>';
+            document.getElementById('employeesContainer').innerHTML = '<div class="loading">Loading employees data...</div>';
+            
+            // Fetch users data
+            fetch('/api/users')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayUsers(data.customers);
+                    displayEmployees(data.employees);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('usersContainer').innerHTML = `<div class="error">Error loading users: ${error.message}</div>`;
+                    document.getElementById('employeesContainer').innerHTML = `<div class="error">Error loading employees: ${error.message}</div>`;
+                });
+        }
+        
+        function displayUsers(users) {
+            const container = document.getElementById('usersContainer');
+            
+            if (!users || users.length === 0) {
+                container.innerHTML = '<div class="loading">No users found</div>';
+                return;
+            }
+            
+            let html = '';
+            users.forEach(user => {
+                html += `
+                    <div class="user-card">
+                        <div class="user-property"><span class="property-name">User ID:</span> ${user.USER_ID}</div>
+                        <div class="user-property"><span class="property-name">Name:</span> ${user.NAME}</div>
+                        <div class="user-property"><span class="property-name">Email:</span> ${user.EMAIL}</div>
+                        <div class="user-property"><span class="property-name">Phone:</span> ${user.PHONE}</div>
+                        <div class="user-property"><span class="property-name">Role:</span> ${user.ROLE}</div>
+                        <div class="user-property"><span class="property-name">Registration Date:</span> ${new Date(user.REGISTRATION_DATE).toLocaleString()}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function displayEmployees(employees) {
+            const container = document.getElementById('employeesContainer');
+            
+            if (!employees || employees.length === 0) {
+                container.innerHTML = '<div class="loading">No employees found</div>';
+                return;
+            }
+            
+            let html = '';
+            employees.forEach(emp => {
+                html += `
+                    <div class="employee-card">
+                        <div class="user-property"><span class="property-name">Employee ID:</span> ${emp.EMPLOYEE_ID}</div>
+                        <div class="user-property"><span class="property-name">User ID:</span> ${emp.USER_ID}</div>
+                        <div class="user-property"><span class="property-name">Name:</span> ${emp.NAME}</div>
+                        <div class="user-property"><span class="property-name">Role:</span> ${emp.ROLE}</div>
+                        <div class="user-property"><span class="property-name">Salary:</span> ₹${emp.SALARY}</div>
+                        <div class="user-property"><span class="property-name">Shift Timings:</span> ${emp.SHIFT_TIMINGS}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+
+    <title>Order History - Campus Canteen</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="js/auth-handler.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #F5BE71;
+            position: relative;
+            overflow-x: hidden;
+            color: #333;
+            background-image: linear-gradient(135deg, #FBE2A9 0%, #F5BE71 50%, #B26F18 100%);
+            animation: gradientAnimation 15s ease infinite;
+            background-size: 400% 400%;
+        }
+        
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(178, 111, 24, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #B26F18;
+            text-decoration: none;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-name {
+            font-weight: 600;
+        }
+        
+        .account-type {
+            background-color: #B26F18;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: #B26F18;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #8B5A13;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #B26F18;
+            text-align: center;
+        }
+        
+        .order-history-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .no-orders {
+            padding: 40px;
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .order-card {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .order-card:last-child {
+            border-bottom: none;
+        }
+        
+        .order-card:hover {
+            background-color: rgba(251, 226, 169, 0.2);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            font-size: 18px;
+            color: #B26F18;
+        }
+        
+        .order-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .status-pending {
+            background-color: #FFF3CD;
+            color: #856404;
+        }
+        
+        .status-preparing {
+            background-color: #D1ECF1;
+            color: #0C5460;
+        }
+        
+        .status-ready {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+        
+        .status-collected {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+        
+        .status-not-picked-up {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .status-cancelled {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .order-info {
+            flex: 1;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        
+        .info-label {
+            width: 150px;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #333;
+        }
+        
+        .payment-method {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #E9ECEF;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .payment-status {
+            margin-left: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .payment-completed {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+        
+        .payment-pending {
+            background-color: #FFF3CD;
+            color: #856404;
+        }
+        
+        .payment-failed {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .payment-refunded {
+            background-color: #D1ECF1;
+            color: #0C5460;
+        }
+        
+        .order-items {
+            margin-top: 15px;
+            border-top: 1px dashed #ddd;
+            padding-top: 15px;
+        }
+        
+        .items-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #B26F18;
+        }
+        
+        .item-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .item-card {
+            display: flex;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+        
+        .item-image.placeholder {
+            background-color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #aaa;
+            font-size: 24px;
+        }
+        
+        .item-details {
+            padding: 10px;
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .item-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .item-quantity {
+            background-color: #F5BE71;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .item-price {
+            font-weight: 500;
+        }
+        
+        .item-category {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .order-total {
+            text-align: right;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #B26F18;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background-color: #B26F18;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background-color: #8B5A13;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .error-message {
+            background-color: #F8D7DA;
+            color: #721C24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Status Update Controls */
+        .status-update-controls {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .status-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .status-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .picked-up {
+            background-color: #D4EDDA;
+            color: #155724;
+        }
+        
+        .not-picked {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+        
+        .cancelled {
+            background-color: #F8D7DA;
+            color: #721C24;
+        }
+        
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .order-details {
+                flex-direction: column;
+            }
+            
+            .item-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+            
+            .info-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .status-update-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="Main.html" class="logo">Campus Canteen</a>
+            <div class="user-info">
+                <span class="user-name" id="userName">Welcome, User!</span>
+                <span class="account-type" id="accountTypeDisplay">Customer</span>
+            </div>
+            <div class="nav-links">
+                <a href="Main.html">Home</a>
+                <a href="cart.html">Cart</a>
+                <a href="orderhistory.html" class="active">Order History</a>
+                <a href="javascript:void(0);" onclick="logout()">Logout</a>
+            </div>
+        </header>
+        
+        <a href="Main.html" class="back-button"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        
+        <h1 class="page-title">Your Order History</h1>
+        
+        <div id="orderHistoryContainer" class="order-history-container">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading your order history...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // First check localStorage for user data
+            const userData = localStorage.getItem('canteenUserData');
+            if (!userData || !JSON.parse(userData).isLoggedIn) {
+                // User is not logged in, redirect to login page
+                window.location.href = '/login.html';
+            } else {
+                // User is logged in, display user info in the UI
+                const user = JSON.parse(userData);
+                
+                // Update user name and account type in the header
+                document.getElementById('userName').textContent = `Welcome, ${user.fullName || 'User'}!`;
+                document.getElementById('accountTypeDisplay').textContent = user.accountType || 'Customer';
+            }
+            
+            // Also check server-side session as a backup
+            const checkSession = async () => {
+                try {
+                    const response = await fetch('/api/auth/check-session');
+                    const data = await response.json();
+                    
+                    if (!data.loggedIn) {
+                        // Redirect to login page if not logged in
+                        window.location.href = '/login.html';
+                        return false;
+                    }
+                    
+                    // Update user info in the header if not already set
+                    if (!userData) {
+                        document.getElementById('userName').textContent = `Welcome, ${data.user.fullName || 'User'}!`;
+                        document.getElementById('accountTypeDisplay').textContent = data.user.accountType || 'Customer';
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error checking session:', error);
+                    return false;
+                }
+            };
+            
+            // Fetch order history
+            const fetchOrderHistory = async () => {
+                try {
+                    console.log('Fetching order history...');
+                    
+                    // Check for orders in localStorage
+                    let localOrders = [];
+                    
+                    // First check for tracking order
+                    const trackingOrderInfo = localStorage.getItem('trackingOrderInfo');
+                    if (trackingOrderInfo) {
+                        try {
+                            const orderInfo = JSON.parse(trackingOrderInfo);
+                            console.log('Found tracking order in localStorage:', orderInfo);
+                            
+                            // Add this order to our local orders array
+                            if (orderInfo.items && orderInfo.items.length > 0) {
+                                localOrders.push({
+                                    ORDER_ID: orderInfo.orderId || Math.floor(Math.random() * 10000),
+                                    ORDER_DATE: orderInfo.paymentDate || new Date().toISOString(),
+                                    SCHEDULED_TIME: orderInfo.pickupTime || new Date().toISOString(),
+                                    TOTAL_AMOUNT: parseFloat(orderInfo.totalAmount.replace('₹', '')) || 0,
+                                    STATUS: 'Pending',
+                                    PICKUP_COUNTER: 'Counter 1',
+                                    CANTEEN_NAME: 'Campus Canteen',
+                                    PAYMENT_METHOD: orderInfo.paymentMethod || 'Cash',
+                                    PAYMENT_STATUS: 'Completed',
+                                    items: orderInfo.items.map(item => ({
+                                        ORDER_ITEM_ID: Math.floor(Math.random() * 10000),
+                                        QUANTITY: item.quantity,
+                                        SUBTOTAL: item.price * item.quantity,
+                                        ITEM_NAME: item.name,
+                                        PRICE: item.price,
+                                        CATEGORY: item.category || 'Food',
+                                        image_path: item.image || ''
+                                    }))
+                                });
+                            }
+                        } catch (e) {
+                            console.error('Error parsing tracking order:', e);
+                        }
+                    }
+                    
+                    // Then check for order history
+                    const orderHistoryData = localStorage.getItem('orderHistory');
+                    if (orderHistoryData) {
+                        try {
+                            const orderHistory = JSON.parse(orderHistoryData);
+                            console.log('Found order history in localStorage:', orderHistory);
+                            
+                            // Add these orders to our local orders array
+                            orderHistory.forEach(orderInfo => {
+                                if (orderInfo.items && orderInfo.items.length > 0) {
+                                    // Check if this order is already in localOrders
+                                    const isDuplicate = localOrders.some(order => 
+                                        order.ORDER_ID === orderInfo.orderId
+                                    );
+                                    
+                                    if (!isDuplicate) {
+                                        localOrders.push({
+                                            ORDER_ID: orderInfo.orderId || Math.floor(Math.random() * 10000),
+                                            ORDER_DATE: orderInfo.paymentDate || new Date().toISOString(),
+                                            SCHEDULED_TIME: orderInfo.pickupTime || new Date().toISOString(),
+                                            TOTAL_AMOUNT: parseFloat(orderInfo.totalAmount.replace('₹', '')) || 0,
+                                            STATUS: 'Pending',
+                                            PICKUP_COUNTER: 'Counter 1',
+                                            CANTEEN_NAME: 'Campus Canteen',
+                                            PAYMENT_METHOD: orderInfo.paymentMethod || 'Cash',
+                                            PAYMENT_STATUS: 'Completed',
+                                            items: orderInfo.items.map(item => ({
+                                                ORDER_ITEM_ID: Math.floor(Math.random() * 10000),
+                                                QUANTITY: item.quantity,
+                                                SUBTOTAL: item.price * item.quantity,
+                                                ITEM_NAME: item.name,
+                                                PRICE: item.price,
+                                                CATEGORY: item.category || 'Food',
+                                                image_path: item.image || ''
+                                            }))
+                                        });
+                                    }
+                                }
+                            });
+                        } catch (e) {
+                            console.error('Error parsing order history:', e);
+                        }
+                    }
+                    
+                    // Migrate orders to history if needed
+                    try {
+                        const migrateResponse = await fetch('/api/orders/migrate-to-history', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const migrateData = await migrateResponse.json();
+                        console.log('Migration result:', migrateData);
+                    } catch (migrateError) {
+                        console.error('Error migrating orders:', migrateError);
+                        // Continue anyway - not critical
+                    }
+                    
+                    // Fetch orders from the server
+                    const userData = localStorage.getItem('canteenUserData');
+                    const userObj = userData ? JSON.parse(userData) : null;
+                    const userId = userObj?.id || null; 
+                    
+                    if (!userId) {
+                        throw new Error('User ID not found. Please login again.');
+                    }
+                    
+                    const container = document.getElementById('orderHistoryContainer');
+                    
+                    // Fetch from server
+                    const response = await fetch(`/api/orders/history/${userId}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                    
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error(`Expected JSON response but got ${contentType}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Server response:', data);
+                    
+                    if (!data.success) {
+                        console.error('Error fetching order history:', data.message);
+                        container.innerHTML = `
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i> ${data.message || 'An error occurred while fetching your order history.'}
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Combine server orders with local orders
+                    const allOrders = [...localOrders];
+                    
+                    if (data.orderHistory && data.orderHistory.length > 0) {
+                        // Add server orders, avoiding duplicates
+                        data.orderHistory.forEach(serverOrder => {
+                            // Check if this order is already in our local orders
+                            const isDuplicate = localOrders.some(localOrder => 
+                                localOrder.ORDER_ID === serverOrder.ORDER_ID
+                            );
+                            
+                            if (!isDuplicate) {
+                                allOrders.push(serverOrder);
+                            }
+                        });
+                    }
+                
+                    console.log('Combined orders:', allOrders);
+                    
+                    if (allOrders.length === 0) {
+                        container.innerHTML = `
+                            <div class="no-orders">
+                                <i class="fas fa-shopping-bag"></i>
+                                <p>You haven't placed any orders yet.</p>
+                                <p>Explore our menu and place your first order!</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Render order history
+                    let ordersHTML = '';
+                    
+                    // Use orderHistory from server response if available, otherwise use orders
+                    const ordersToRender = data.orderHistory || data.orders || [];
+                    
+                    ordersToRender.forEach(order => {
+                        // Format date and time
+                        const orderDate = new Date(order.ORDER_DATE);
+                        const formattedDate = orderDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        // Format scheduled time if available
+                        let formattedScheduledTime = 'Not specified';
+                        if (order.SCHEDULED_TIME) {
+                            try {
+                                const scheduledTime = new Date(order.SCHEDULED_TIME);
+                                formattedScheduledTime = scheduledTime.toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                            } catch (e) {
+                                console.error('Error formatting scheduled time:', e);
+                            }
+                        }
+                        
+                        // Determine status class
+                        let statusClass = '';
+                        switch (order.STATUS) {
+                            case 'Pending':
+                                statusClass = 'status-pending';
+                                break;
+                            case 'Preparing':
+                                statusClass = 'status-preparing';
+                                break;
+                            case 'Ready':
+                                statusClass = 'status-ready';
+                                break;
+                            case 'Collected':
+                            case 'Picked Up':
+                                statusClass = 'status-collected';
+                                break;
+                            case 'Not Picked Up':
+                                statusClass = 'status-not-picked-up';
+                                break;
+                            case 'Cancelled':
+                                statusClass = 'status-cancelled';
+                                break;
+                            default:
+                                statusClass = '';
+                        }
+                        
+                        // Determine payment status class
+                        let paymentStatusClass = '';
+                        switch (order.PAYMENT_STATUS) {
+                            case 'Completed':
+                                paymentStatusClass = 'payment-completed';
+                                break;
+                            case 'Pending':
+                                paymentStatusClass = 'payment-pending';
+                                break;
+                            case 'Failed':
+                                paymentStatusClass = 'payment-failed';
+                                break;
+                            case 'Refunded':
+                                paymentStatusClass = 'payment-refunded';
+                                break;
+                            default:
+                                paymentStatusClass = '';
+                        }
+                        
+                        // Generate items HTML
+                        let itemsHTML = '';
+                        if (order.items && order.items.length > 0) {
+                            // If we have detailed items data
+                            order.items.forEach(item => {
+                                const imagePath = item.image_path || '';
+                                const imageHTML = imagePath ? 
+                                    `<img src="${imagePath}" alt="${item.ITEM_NAME}" class="item-image">` : 
+                                    `<div class="item-image placeholder"><i class="fas fa-utensils"></i></div>`;
+                                
+                                itemsHTML += `
+                                    <div class="item-card">
+                                        ${imageHTML}
+                                        <div class="item-details">
+                                            <div class="item-name">${item.ITEM_NAME}</div>
+                                            <div class="item-meta">
+                                                <span class="item-quantity">Qty: ${item.QUANTITY}</span>
+                                                <span class="item-price">₹${item.SUBTOTAL || (item.PRICE * item.QUANTITY).toFixed(2)}</span>
+                                            </div>
+                                            <div class="item-category">${item.CATEGORY || 'Food'}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else if (order.items_name) {
+                            // If we have items_name string from OrderHistory
+                            const itemsList = order.items_name.split(', ');
+                            
+                            if (itemsList.length > 0) {
+                                itemsList.forEach(itemText => {
+                                    itemsHTML += `
+                                        <div class="item-card">
+                                            <div class="item-image placeholder"><i class="fas fa-utensils"></i></div>
+                                            <div class="item-details">
+                                                <div class="item-name">${itemText}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                            } else {
+                                itemsHTML = `
+                                    <div class="item-card">
+                                        <div class="item-image placeholder"><i class="fas fa-utensils"></i></div>
+                                        <div class="item-details">
+                                            <div class="item-name">${order.items_name}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            itemsHTML = '<p>No items found for this order.</p>';
+                        }
+                        
+                        // Generate payment method icon
+                        let paymentIcon = '';
+                        switch (order.PAYMENT_METHOD) {
+                            case 'Credit Card':
+                                paymentIcon = '<i class="fas fa-credit-card"></i>';
+                                break;
+                            case 'Debit Card':
+                                paymentIcon = '<i class="far fa-credit-card"></i>';
+                                break;
+                            case 'UPI':
+                                paymentIcon = '<i class="fas fa-mobile-alt"></i>';
+                                break;
+                            case 'Cash':
+                                paymentIcon = '<i class="fas fa-money-bill-wave"></i>';
+                                break;
+                            case 'Wallet':
+                                paymentIcon = '<i class="fas fa-wallet"></i>';
+                                break;
+                            default:
+                                paymentIcon = '<i class="fas fa-money-check"></i>';
+                        }
+                        
+                        // Build the order card
+                        ordersHTML += `
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div class="order-id">Order #${order.ORDER_ID}</div>
+                                    <div class="order-date">${formattedDate}</div>
+                                    <div class="order-status ${statusClass}">${order.STATUS}</div>
+                                </div>
+                                
+                                <!-- Add status update controls for admin or kitchen staff -->
+                                ${user.accountType === 'Admin' || user.accountType === 'KitchenStaff' ? `
+                                <div class="status-update-controls">
+                                    <button onclick="updateOrderStatus(${order.ORDER_ID}, 'Picked Up')" class="status-btn picked-up">Mark as Picked Up</button>
+                                    <button onclick="updateOrderStatus(${order.ORDER_ID}, 'Not Picked Up')" class="status-btn not-picked">Mark as Not Picked Up</button>
+                                    <button onclick="updateOrderStatus(${order.ORDER_ID}, 'Cancelled')" class="status-btn cancelled">Cancel Order</button>
+                                </div>
+                                ` : ''}
+                                
+                                <div class="order-details">
+                                    <div class="order-info">
+                                        <div class="info-row">
+                                            <div class="info-label">Canteen:</div>
+                                            <div class="info-value">${order.CANTEEN_NAME}</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Scheduled Pickup:</div>
+                                            <div class="info-value">${formattedScheduledTime}</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Pickup Counter:</div>
+                                            <div class="info-value">${order.PICKUP_COUNTER}</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label">Payment Method:</div>
+                                            <div class="info-value">
+                                                <span class="payment-method">
+                                                    ${paymentIcon} ${order.PAYMENT_METHOD || 'Not specified'}
+                                                </span>
+                                                <span class="payment-status ${paymentStatusClass}">
+                                                    ${order.PAYMENT_STATUS || 'Unknown'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="order-items">
+                                    <div class="items-title">Ordered Items</div>
+                                    <div class="item-list">
+                                        ${itemsHTML}
+                                    </div>
+                                </div>
+                                
+                                <div class="order-total">
+                                    Total: ₹${parseFloat(order.TOTAL_AMOUNT).toFixed(2)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = ordersHTML;
+                    
+                } catch (error) {
+                    console.error('Error fetching order history:', error);
+                    document.getElementById('orderHistoryContainer').innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> An error occurred while fetching your order history.
+                        </div>
+                    `;
+                }
+            };
+            
+            // Initialize the page
+            const init = async () => {
+                // If we already checked localStorage and user is logged in, fetch order history
+                if (userData && JSON.parse(userData).isLoggedIn) {
+                    fetchOrderHistory();
+                } else {
+                    // Double-check with server as backup
+                    const isLoggedIn = await checkSession();
+                    if (isLoggedIn) {
+                        fetchOrderHistory();
+                    }
+                }
+            };
+            
+            init();
+            
+            // Logout function
+            window.logout = function() {
+                // Use the authHandler logout function if available
+                if (window.authHandler && typeof window.authHandler.logout === 'function') {
+                    window.authHandler.logout();
+                } else {
+                    // Fallback if authHandler is not available
+                    localStorage.removeItem('canteenUserData');
+                    window.location.href = '/api/logout';
+                }
+            };
+            
+            // Function to update order status
+            window.updateOrderStatus = async function(orderId, status) {
+                try {
+                    // Show confirmation dialog
+                    if (!confirm(`Are you sure you want to mark this order as "${status}"?`)) {
+                        return;
+                    }
+                    
+                    // Send request to update status
+                    const response = await fetch(`/api/orders/history/${orderId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(`Order status updated to ${status}`);
+                        // Refresh order history
+                        fetchOrderHistory();
+                    } else {
+                        alert(`Error: ${data.message}`);
+                    }
+                } catch (error) {
+                    console.error('Error updating order status:', error);
+                    alert('An error occurred while updating order status');
+                }
+            };
+        });
+    </script>
+</body>
+</html>

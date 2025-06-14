@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Cravings - Admin Dashboard</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+
+    <style>
+        :root {
+    --primary-color: rgb(231, 143, 58); /* Changed from yellow-ish to orange */
+    --secondary-color: #ff6b6b; /* keep if you want red-ish secondary */
+    --accent-color: #ffb347; /* orange-ish accent, you can tweak */
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --success-color: #28a745;
+    --hover-primary-color: #e67300; /* new hover color - bright orange */
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 30px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-links i {
+            margin-right: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 5%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .admin-sidebar {
+            flex: 1;
+            min-width: 250px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .admin-content {
+            flex: 3;
+            min-width: 300px;
+        }
+        
+        .admin-title {
+            margin-bottom: 30px;
+        }
+        
+        .admin-title h1 {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        
+        .admin-title p {
+            color: #6c757d;
+        }
+        
+        .admin-menu {
+            list-style: none;
+        }
+        
+        .admin-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .admin-menu a {
+            display: block;
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+       .admin-menu a:hover, .admin-menu a.active {
+    background-color: rgba(231, 143, 58, 0.1); /* light orange background */
+    color: var(--primary-color);
+}
+
+        
+        .admin-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color:rgb(231, 143, 58);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+        
+        .stat-card p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .recent-orders {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+    background-color: var(--hover-primary-color);
+}
+
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        table th {
+            font-weight: 500;
+            color: var(--dark-color);
+            background-color: #f8f9fa;
+        }
+        
+        table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-preparing {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-ready {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-delivered {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        
+        /* Styles for the current canteen indicator - simplified */
+        .current-canteen-indicator {
+            display: flex;
+            align-items: center;
+            background-color: rgba(231, 143, 58, 0.15);
+            color: var(--primary-color);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid var(--primary-color);
+            margin-left: 20px;
+            position: relative;
+        }
+        
+        .current-canteen-indicator i {
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+        
+        #current-canteen-name {
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+        
+        /* Canteen badge for sidebar - simplified */
+        .canteen-badge {
+            background-color: rgba(231, 143, 58, 0.08);
+            border-left: 2px solid var(--primary-color);
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .canteen-badge-title {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        
+        .canteen-badge-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 40px 5%;
+            text-align: center;
+            margin-top: 60px;
+        }
+        
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            text-align: left;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column ul li a:hover {
+            color: white;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+        
+        .social-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .copyright {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #495057;
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 40px 0;
+                transition: left 0.3s;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links li {
+                margin: 15px 0;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .admin-container {
+                flex-direction: column;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            /* Responsive styles for canteen indicator */
+            .current-canteen-indicator {
+                position: static;
+                transform: none;
+                margin: 5px 0;
+                width: auto;
+            }
+            
+            .navbar {
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 5px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="js/auth-handler.js"></script>
+    <style>
+        /* Canteen Authentication Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .auth-code-display {
+            background-color: #f8f9fa;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .modal-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .btn-authenticate {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-authenticate:hover {
+            background-color: var(--hover-primary-color);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Welcome and Canteen Selection -->
+    <div id="adminWelcomeSection" style="max-width: 800px; margin: 50px auto; text-align: center; padding: 30px; background-color: white; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);">
+        <div style="text-align: right; margin-bottom: 20px;">
+            <a href="javascript:void(0);" onclick="logout()" style="color: var(--dark-color); text-decoration: none; font-size: 1rem;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        <div style="margin-bottom: 30px;">
+            <i class="fas fa-utensils" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 20px;"></i>
+            <h1 style="font-size: 2.5rem; margin-bottom: 15px; color: var(--dark-color);">Welcome to Admin Dashboard</h1>
+            <p style="font-size: 1.2rem; color: #6c757d; margin-bottom: 30px;">Please select a canteen to view detailed reports and management options.</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="canteen-select" style="font-size: 1.2rem; margin-bottom: 15px; display: block; font-weight: 500;">Select Canteen:</label>
+            <select id="canteen-select" onchange="updateAuthCode()" style="width: 100%; max-width: 400px; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1.1rem; margin-bottom: 20px;">
+                <option value="">-- Select Canteen --</option>
+                <option value="1">BIG MINGOES</option>
+                <option value="2">MINI MINGOES</option>
+                <option value="3">M M FOODS</option>
+            </select>
+        </div>
+        
+        <div id="auth-code-section" style="display: none; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+            <h3 style="margin-bottom: 15px; color: var(--primary-color);">Canteen Authentication Required</h3>
+            
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 10px; font-weight: 500;">Authentication Code for Demo:</label>
+                <div class="auth-code-display" id="auth-code-display" style="background-color: white; border: 1px dashed #ccc; padding: 15px; margin: 10px auto; text-align: center; font-family: monospace; font-size: 1.5rem; color: #666; max-width: 200px;"></div>
+                <p><small>For demo purposes, the code is displayed above. In a real system, this would be provided securely to authorized personnel.</small></p>
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="auth-code-input" style="display: block; margin-bottom: 10px; font-weight: 500;">Enter Authentication Code:</label>
+                <input type="text" id="auth-code-input" placeholder="Enter the code shown above" style="width: 100%; max-width: 300px; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1.1rem; margin-bottom: 10px;">
+                <div class="error-message" id="auth-code-error" style="color: #dc3545; margin-top: 5px; font-size: 0.9rem; display: none;">Invalid authentication code. Please try again.</div>
+            </div>
+            
+            <button id="authenticate-btn" class="btn-authenticate" onclick="authenticateCanteen()" style="background-color: var(--primary-color); color: white; padding: 12px 25px; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.3s; margin-top: 20px;">Authenticate</button>
+        </div>
+    </div>
+    
+    <!-- Main Admin Dashboard (initially hidden) -->
+    <div id="adminDashboardSection" style="display: none;">
+        <header>
+            <nav class="navbar">
+                <div style="display: flex; align-items: center;">
+                    <div class="logo">
+                        <i class="fas fa-utensils"></i>
+                        <span>Campus Cravings</span>
+                    </div>
+                    
+                    <!-- Simplified canteen indicator -->
+                    <div id="current-canteen-indicator" class="current-canteen-indicator">
+                        <i class="fas fa-store"></i>
+                        <span id="current-canteen-name">Not Authenticated</span>
+                    </div>
+                </div>
+                
+                <ul class="nav-links">
+                    <li><a href="admin.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="javascript:void(0);" onclick="showMenuItems()"><i class="fas fa-list-alt"></i> Menu Management</a></li>
+                    <li><a href="#"><i class="fas fa-clipboard-list"></i> Orders</a></li>
+                    <li><a href="#"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                    <li><a href="javascript:void(0);" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+                
+                <div class="hamburger">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </header>
+        
+        <div class="admin-container">
+            <div class="admin-sidebar">
+                <div class="admin-profile">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="width: 80px; height: 80px; background-color: #ddd; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #777;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 style="margin-bottom: 5px;">Admin User</h3>
+                        <p style="color: #6c757d; font-size: 0.9rem;">admin@collegecanteen.edu</p>
+                    </div>
+                </div>
+                
+                <!-- Simplified canteen badge -->
+                <div class="canteen-badge">
+                    <div class="canteen-badge-title">
+                        Current Canteen
+                    </div>
+                    <div class="canteen-badge-name" id="sidebar-canteen-name">Not Selected</div>
+                </div>
+                
+                <ul class="admin-menu">
+                    <li><a href="#" class="active" onclick="showDashboard()"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="#" onclick="showMenuItems()"><i class="fas fa-list-alt"></i> Menu Items</a></li>
+                    <li><a href="#" onclick="showCanteenSelection()"><i class="fas fa-store"></i> Canteens</a></li>
+                    <li><a href="#" onclick="showOrders()"><i class="fas fa-clipboard-list"></i> Orders</a></li>
+                    <li><a href="#" onclick="showCustomers()"><i class="fas fa-users"></i> Customers</a></li>
+                    <li><a href="#" onclick="showReports()"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                    <li><a href="#" onclick="showSettings()"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a href="javascript:void(0);" onclick="clearCanteenAuth()"><i class="fas fa-exchange-alt"></i> Change Canteen</a></li>
+                </ul>
+            </div>
+            
+            <div class="admin-content">
+                <!-- Dashboard Section -->
+                <div id="dashboardContent" class="content-section">
+                    <div class="admin-title">
+                        <h1 id="canteenDashboardTitle">Admin Dashboard</h1>
+                        <p id="canteenDashboardSubtitle">Welcome back! Here's what's happening with your canteen today.</p>
+                    </div>
+                </div>
+                
+                <!-- Canteen Selection Section -->
+                <div id="canteenSelectionContent" class="content-section" style="display: none;">
+                    <div class="admin-title">
+                        <h1>Canteen Selection</h1>
+                        <p>Select a canteen to view and manage its details.</p>
+                    </div>
+                    
+                    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <div class="form-group">
+                            <label for="dashboard-canteen-select" style="font-size: 1.2rem; margin-bottom: 15px; display: block; font-weight: 500;">Select Canteen:</label>
+                            <select id="dashboard-canteen-select" onchange="updateDashboardAuthCode()" style="width: 100%; max-width: 400px; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1.1rem; margin-bottom: 20px;">
+                                <option value="">-- Select Canteen --</option>
+                                <option value="1">BIG MINGOES</option>
+                                <option value="2">MINI MINGOES</option>
+                                <option value="3">M M FOODS</option>
+                            </select>
+                        </div>
+                        
+                        <div id="dashboard-auth-code-section" style="display: none; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+                            <h3 style="margin-bottom: 15px; color: var(--primary-color);">Canteen Authentication Required</h3>
+                            
+                            <div class="form-group">
+                                <label style="display: block; margin-bottom: 10px; font-weight: 500;">Authentication Code for Demo:</label>
+                                <div class="auth-code-display" id="dashboard-auth-code-display" style="background-color: white; border: 1px dashed #ccc; padding: 15px; margin: 10px auto; text-align: center; font-family: monospace; font-size: 1.5rem; color: #666; max-width: 200px;"></div>
+                                <p><small>For demo purposes, the code is displayed above. In a real system, this would be provided securely to authorized personnel.</small></p>
+                            </div>
+                            
+                            <div class="form-group" style="margin-top: 20px;">
+                                <label for="dashboard-auth-code-input" style="display: block; margin-bottom: 10px; font-weight: 500;">Enter Authentication Code:</label>
+                                <input type="text" id="dashboard-auth-code-input" placeholder="Enter the code shown above" style="width: 100%; max-width: 300px; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1.1rem; margin-bottom: 10px;">
+                                <div class="error-message" id="dashboard-auth-code-error" style="color: #dc3545; margin-top: 5px; font-size: 0.9rem; display: none;">Invalid authentication code. Please try again.</div>
+                            </div>
+                            
+                            <button id="dashboard-authenticate-btn" class="btn-authenticate" onclick="authenticateDashboardCanteen()" style="background-color: var(--primary-color); color: white; padding: 12px 25px; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.3s; margin-top: 20px;">Authenticate</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Other content sections will be added here (Menu Items, Orders, etc.) -->
+                <div id="menuItemsContent" class="content-section" style="display: none;">
+                    <div class="admin-title">
+                        <h1>Menu Items</h1>
+                        <p>Manage menu items for your canteen.</p>
+                    </div>
+                    
+                    <!-- Menu Items Management -->
+                    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <div class="section-header">
+                            <h2>Menu Items</h2>
+                            <button class="btn btn-primary" onclick="showAddMenuItemForm()">
+                                <i class="fas fa-plus"></i> Add New Item
+                            </button>
+                        </div>
+                        
+                        <!-- Menu Items Table -->
+                        <div id="menuItemsTableContainer" style="margin-top: 20px;">
+                            <div id="menuItemsLoading" style="text-align: center; padding: 20px;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                                <p style="margin-top: 10px;">Loading menu items...</p>
+                            </div>
+                            <div id="menuItemsError" style="display: none; text-align: center; padding: 20px; color: #dc3545;">
+                                <i class="fas fa-exclamation-circle" style="font-size: 2rem;"></i>
+                                <p style="margin-top: 10px;">Failed to load menu items. Please try again.</p>
+                            </div>
+                            <div id="menuItemsEmpty" style="display: none; text-align: center; padding: 20px; color: #6c757d;">
+                                <i class="fas fa-utensils" style="font-size: 2rem;"></i>
+                                <p style="margin-top: 10px;">No menu items found. Add your first item!</p>
+                            </div>
+                            <table id="menuItemsTable" style="display: none; width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Available</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="menuItemsTableBody">
+                                    <!-- Menu items will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Add/Edit Menu Item Form (initially hidden) -->
+                    <div id="menuItemFormContainer" style="display: none; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <div class="section-header">
+                            <h2 id="menuItemFormTitle">Add New Menu Item</h2>
+                            <button class="btn" style="background-color: #6c757d; color: white;" onclick="hideMenuItemForm()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                        
+                        <form id="menuItemForm" style="margin-top: 20px;" enctype="multipart/form-data">
+                            <input type="hidden" id="menuItemId" value="">
+                            
+                            <div class="form-group">
+                                <label for="menuItemName">Item Name *</label>
+                                <input type="text" id="menuItemName" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menuItemCategory">Category *</label>
+                                <select id="menuItemCategory" required>
+                                    <option value="">-- Select Category --</option>
+                                    <option value="Snacks">Snacks</option>
+                                    <option value="Cold Beverages">Cold Beverages</option>
+                                    <option value="Vegetarian">Vegetarian</option>
+                                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                                    <option value="Desserts">Desserts</option>
+                                    <option value="North-Indian">North-Indian</option>
+                                    <option value="South-Indian">South-Indian</option>
+                                    <option value="Chinese">Chinese</option>
+                                    <option value="Chats">Chats</option>
+                                    <option value="Meals">Meals</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menuItemPrice">Price (₹) *</label>
+                                <input type="number" id="menuItemPrice" min="0" step="0.01" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menuItemDescription">Description</label>
+                                <textarea id="menuItemDescription" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Availability</label>
+                                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="menuItemAvailable" value="true" checked style="margin-right: 8px;">
+                                        Available
+                                    </label>
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="menuItemAvailable" value="false" style="margin-right: 8px;">
+                                        Not Available
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="menuItemImageType">Item Image Source</label>
+                                <div style="margin-top: 10px;">
+                                    <select id="menuItemImageType" onchange="toggleImageSourceType()">
+                                        <option value="existing">Use Existing Image</option>
+                                        <option value="upload">Upload New Image</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Existing Images Selector (Default) -->
+                                <div id="existingImageContainer" style="margin-top: 15px;">
+                                    <label for="menuItemExistingImage">Select Image</label>
+                                    <select id="menuItemExistingImage" style="width: 100%;" onchange="previewExistingImage()">
+                                        <option value="">-- Select an image --</option>
+                                        <option value="images/food/paneer_roll.jpg">Paneer Roll</option>
+                                        <option value="images/food/veg_sandwich.jpg">Veg Sandwich</option>
+                                        <option value="images/food/masala_dosa.jpg">Masala Dosa</option>
+                                        <option value="images/food/idli_sambar.jpg">Idli Sambar</option>
+                                        <option value="images/food/veg_fried_rice.jpg">Veg Fried Rice</option>
+                                        <option value="images/food/veg_noodles.jpg">Veg Noodles</option>
+                                        <option value="images/food/pastry.jpg">Pastry</option>
+                                        <option value="images/food/ice_creams.jpg">Ice Cream</option>
+                                        <option value="images/food/butter_naan.jpg">Butter Naan</option>
+                                        <option value="images/food/paneer_butter_masala.jpg">Paneer Butter Masala</option>
+                                        <option value="images/food/veg_manchurian.jpg">Veg Manchurian</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Upload New Image (Hidden by default) -->
+                                <div id="uploadImageContainer" style="margin-top: 15px; display: none;">
+                                    <label for="menuItemImage">Upload Image</label>
+                                    <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+                                        <input type="file" id="menuItemImage" accept="image/*" style="flex: 1;">
+                                        <div id="currentImageContainer" style="display: none;">
+                                            <img id="currentMenuItemImage" src="" alt="Current image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Image Preview (for both existing and uploaded) -->
+                                <div id="menuItemImagePreview" style="margin-top: 15px; display: none;">
+                                    <img id="previewImage" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 5px;">
+                                    <button type="button" class="btn" style="background-color: #dc3545; color: white; margin-top: 10px;" onclick="clearImagePreview()">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 30px; text-align: right;">
+                                <button type="button" class="btn" style="background-color: #6c757d; color: white; margin-right: 10px;" onclick="hideMenuItemForm()">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Item
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="ordersContent" class="content-section" style="display: none;">
+                    <div class="admin-title">
+                        <h1>Orders</h1>
+                        <p>Manage orders for your canteen.</p>
+                    </div>
+                    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <p>Orders management will be implemented here.</p>
+                    </div>
+                </div>
+                
+                <div id="customersContent" class="content-section" style="display: none;">
+                    <div class="admin-title">
+                        <h1>Customer Analysis</h1>
+                        <p>View detailed analysis of your customer base.</p>
+                    </div>
+                    
+                    <div id="customer-analysis-loading" style="text-align: center; padding: 30px; background-color: white; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                        <p style="margin-top: 10px;">Loading customer data...</p>
+                    </div>
+                    
+                    <div id="customer-analysis-error" style="display: none; padding: 30px; text-align: center; background-color: white; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px; color: #dc3545;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Failed to load customer data. Please try again later.</p>
+                    </div>
+                    
+                    <div id="customer-analysis-content" style="display: none;">
+                        <div class="stats-cards" style="margin-top: 20px;">
+                            <div class="stat-card">
+                                <i class="fas fa-users"></i>
+                                <h3 id="total-customers">--</h3>
+                                <p>Total Customers</p>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <i class="fas fa-user-check"></i>
+                                <h3 id="active-customers">--</h3>
+                                <p>Active Customers (Last 30 Days)</p>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <i class="fas fa-user-clock"></i>
+                                <h3 id="inactive-customers">--</h3>
+                                <p>Inactive Customers</p>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <i class="fas fa-chart-pie"></i>
+                                <h3 id="active-percentage">--</h3>
+                                <p>Active Percentage</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background-color: white; padding: 25px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 30px;">
+                            <div class="section-header">
+                                <h2>Active Customers (Last 30 Days)</h2>
+                                <a href="javascript:void(0);" onclick="showReports()" class="btn btn-primary">Export Report</a>
+                            </div>
+                            
+                            <div style="overflow-x: auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Contact</th>
+                                            <th>Orders</th>
+                                            <th>Last Order</th>
+                                            <th>Registration Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="active-customers-table">
+                                        <!-- Active customers will be dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div style="background-color: white; padding: 25px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 30px;">
+                            <div class="section-header">
+                                <h2>Inactive Customers</h2>
+                            </div>
+                            
+                            <div style="overflow-x: auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Contact</th>
+                                            <th>Orders</th>
+                                            <th>Last Order</th>
+                                            <th>Registration Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inactive-customers-table">
+                                        <!-- Inactive customers will be dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="reportsContent" class="content-section" style="display: none;">
+                    <div class="admin-title">
+                        <h1>Reports</h1>
+                        <p>Generate and download reports for your canteen.</p>
+                    </div>
+                    
+                    <div style="background-color: white; padding: 25px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <h2 style="margin-bottom: 20px; font-size: 1.4rem;">Available Reports</h2>
+                        
+                        <div id="reports-loading" style="text-align: center; padding: 20px; display: none;">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                            <p style="margin-top: 10px;">Preparing reports...</p>
+                        </div>
+                        
+                        <div id="reports-error" style="display: none; padding: 20px; text-align: center; color: #dc3545;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>Failed to generate reports. Please try again later.</p>
+                        </div>
+                        
+                        <div id="reports-list">
+                            <div class="report-item" style="display: flex; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px;">
+                                <div style="flex: 1;">
+                                    <h3 style="margin-bottom: 5px; font-size: 1.2rem;">Customer Analysis Report</h3>
+                                    <p style="color: #6c757d; font-size: 0.9rem;">Detailed breakdown of active and inactive customers with order history.</p>
+                                </div>
+                                <button id="download-customer-report" class="btn btn-primary" onclick="generateCustomerReport()">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                            
+                            <div class="report-item" style="display: flex; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px;">
+                                <div style="flex: 1;">
+                                    <h3 style="margin-bottom: 5px; font-size: 1.2rem;">Sales Report</h3>
+                                    <p style="color: #6c757d; font-size: 0.9rem;">Sales summary and trends for your canteen.</p>
+                                </div>
+                                <button class="btn btn-primary" onclick="generateSalesReport()">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                            
+                            <div class="report-item" style="display: flex; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 5px;">
+                                <div style="flex: 1;">
+                                    <h3 style="margin-bottom: 5px; font-size: 1.2rem;">Inventory Report</h3>
+                                    <p style="color: #6c757d; font-size: 0.9rem;">Current inventory levels and usage patterns.</p>
+                                </div>
+                                <button class="btn btn-primary" onclick="generateInventoryReport()">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="settingsContent" class="content-section" style="display: none;">
+                    <div class="admin-title">
+                        <h1>Settings</h1>
+                        <p>Manage settings for your canteen.</p>
+                    </div>
+                    <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+                        <p>Settings will be implemented here.</p>
+                    </div>
+                </div>
+            
+            <div class="stats-cards" id="dashboard-stats">
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3 id="stat-orders">--</h3>
+                    <p>Today's Orders</p>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3 id="stat-revenue">--</h3>
+                    <p>Today's Revenue</p>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-utensils"></i>
+                    <h3 id="stat-menu-items">--</h3>
+                    <p>Menu Items</p>
+                </div>
+                
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h3 id="stat-users">--</h3>
+                    <p>Active Users</p>
+                </div>
+            </div>
+            
+            <div class="recent-orders">
+                <div class="section-header">
+                    <h2>Recent Orders</h2>
+                    <a href="javascript:void(0);" onclick="showOrders()" class="btn btn-primary">View All</a>
+                </div>
+                
+                <div id="orders-loading" style="text-align: center; padding: 20px; display: none;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <p style="margin-top: 10px;">Loading orders...</p>
+                </div>
+                
+                <div id="orders-error" style="display: none; padding: 20px; text-align: center; color: #dc3545;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>Failed to load orders. Please try again later.</p>
+                </div>
+                
+                <div id="orders-empty" style="display: none; padding: 20px; text-align: center; color: #6c757d;">
+                    <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>No orders found for this canteen.</p>
+                </div>
+                
+                <table id="recent-orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Scheduled Time</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-orders-body">
+                        <!-- Orders will be loaded dynamically via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>About Us</h3>
+                <p>Campus Cravings Pre-Order System helps students and staff order food in advance to avoid waiting in lines during peak hours.</p>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="menu.html">Menu</a></li>
+                    <li><a href="orders.html">Order History</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Contact</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> Campus Center, College Road</li>
+                    <li><i class="fas fa-phone"></i> (123) 456-7890</li>
+                    <li><i class="fas fa-envelope"></i> support@collegecanteen.edu</li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 Campus Cravings Pre-Order System. All rights reserved.
+        </div>
+    </footer>
+    </div> <!-- End of adminDashboardSection -->
+
+    <script>
+        // Check if user is logged in as admin
+        window.addEventListener('DOMContentLoaded', function() {
+            const userData = localStorage.getItem('canteenUserData');
+            if (!userData) {
+                // No user data found, redirect to login
+                alert('Please login as an admin to access this page');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            const user = JSON.parse(userData);
+            if (!user.isLoggedIn || user.accountType !== 'admin') {
+                // Not logged in as admin, redirect to login
+                alert('You need admin privileges to access this page');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Update admin profile info
+            const adminName = document.querySelector('.admin-profile h3');
+            const adminEmail = document.querySelector('.admin-profile p');
+            
+            if (adminName && user.fullName) {
+                adminName.textContent = user.fullName;
+            }
+            
+            if (adminEmail && (user.email || user.phone)) {
+                adminEmail.textContent = user.email || user.phone;
+            }
+        });
+        
+        // Mobile menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+        
+        // Admin menu active state and content switching
+        document.querySelectorAll('.admin-menu a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector('.admin-menu a.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+        
+        // Functions to show different content sections
+        function showDashboard() {
+            hideAllContentSections();
+            document.getElementById('dashboardContent').style.display = 'block';
+            
+            // Load dashboard stats and recent orders
+            loadDashboardStats();
+            loadRecentOrders();
+        }
+        
+        function showMenuItems() {
+            hideAllContentSections();
+            const menuItemsContent = document.getElementById('menuItemsContent');
+            menuItemsContent.style.display = 'block';
+            
+            // Trigger the custom 'show' event to load menu items
+            const showEvent = new Event('show');
+            menuItemsContent.dispatchEvent(showEvent);
+            
+            // Hide the menu item form if it's open
+            document.getElementById('menuItemFormContainer').style.display = 'none';
+            document.getElementById('menuItemsTableContainer').style.display = 'block';
+        }
+        
+        function showCanteenSelection() {
+            hideAllContentSections();
+            document.getElementById('canteenSelectionContent').style.display = 'block';
+            
+            // Reset the canteen select and auth code section
+            const canteenSelect = document.getElementById('dashboard-canteen-select');
+            if (canteenSelect) {
+                canteenSelect.value = '';
+            }
+            
+            const authCodeSection = document.getElementById('dashboard-auth-code-section');
+            if (authCodeSection) {
+                authCodeSection.style.display = 'none';
+            }
+            
+            const authCodeInput = document.getElementById('dashboard-auth-code-input');
+            if (authCodeInput) {
+                authCodeInput.value = '';
+            }
+            
+            const authCodeError = document.getElementById('dashboard-auth-code-error');
+            if (authCodeError) {
+                authCodeError.style.display = 'none';
+            }
+        }
+        
+        function showOrders() {
+            hideAllContentSections();
+            document.getElementById('ordersContent').style.display = 'block';
+        }
+        
+        function showCustomers() {
+            hideAllContentSections();
+            document.getElementById('customersContent').style.display = 'block';
+            
+            // Load customer analysis data
+            loadCustomerAnalysis();
+        }
+        
+        function showReports() {
+            hideAllContentSections();
+            document.getElementById('reportsContent').style.display = 'block';
+        }
+        
+        function showSettings() {
+            hideAllContentSections();
+            document.getElementById('settingsContent').style.display = 'block';
+        }
+        
+        // Load dashboard statistics
+        function loadDashboardStats() {
+            // Check if we have a canteen ID
+            if (!window.currentCanteenId) {
+                console.error('No canteen selected');
+                return;
+            }
+            
+            console.log('Loading dashboard stats for canteen ID:', window.currentCanteenId);
+            
+            // Clear previous stats
+            document.getElementById('stat-orders').textContent = '--';
+            document.getElementById('stat-revenue').textContent = '--';
+            document.getElementById('stat-menu-items').textContent = '--';
+            document.getElementById('stat-users').textContent = '--';
+            
+            // Fetch stats from API
+            const url = `/api/orders/stats/${window.currentCanteenId}`;
+            console.log('Fetching stats from URL:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Stats response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received stats data:', data);
+                    
+                    if (data.success) {
+                        const stats = data.stats || {};
+                        
+                        // Update the stats cards
+                        document.getElementById('stat-orders').textContent = stats.orderCount || 0;
+                        document.getElementById('stat-revenue').textContent = `$${parseFloat(stats.revenue || 0).toFixed(2)}`;
+                        document.getElementById('stat-menu-items').textContent = stats.menuCount || 0;
+                        document.getElementById('stat-users').textContent = stats.userCount || 0;
+                    } else {
+                        console.error('Failed to load stats:', data.message);
+                        alert('Failed to load statistics: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                    alert('Error loading statistics: ' + error.message);
+                });
+        }
+        
+        // Load recent orders
+        function loadRecentOrders() {
+            // Check if we have a canteen ID
+            if (!window.currentCanteenId) {
+                console.error('No canteen selected');
+                return;
+            }
+            
+            console.log('Loading recent orders for canteen ID:', window.currentCanteenId);
+            
+            const loadingElement = document.getElementById('orders-loading');
+            const errorElement = document.getElementById('orders-error');
+            const emptyElement = document.getElementById('orders-empty');
+            const tableElement = document.getElementById('recent-orders-table');
+            const tableBodyElement = document.getElementById('recent-orders-body');
+            
+            // Show loading
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            emptyElement.style.display = 'none';
+            tableElement.style.display = 'none';
+            
+            // Fetch recent orders from API (limit to 5)
+            const url = `/api/orders/recent/${window.currentCanteenId}?limit=5`;
+            console.log('Fetching from URL:', url);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data:', data);
+                    loadingElement.style.display = 'none';
+                    
+                    if (data.success) {
+                        const orders = data.orders || [];
+                        console.log('Orders:', orders);
+                        
+                        if (orders.length === 0) {
+                            console.log('No orders found');
+                            emptyElement.style.display = 'block';
+                            return;
+                        }
+                        
+                        // Clear previous orders
+                        tableBodyElement.innerHTML = '';
+                        
+                        // Add each order to the table
+                        orders.forEach(order => {
+                            console.log('Processing order:', order);
+                            const row = document.createElement('tr');
+                            
+                            // Format date
+                            const scheduledDate = new Date(order.SCHEDULED_TIME);
+                            const formattedDate = scheduledDate.toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                            });
+                            
+                            // Determine status class
+                            let statusClass = 'status-pending';
+                            if (order.STATUS === 'Preparing') statusClass = 'status-preparing';
+                            if (order.STATUS === 'Ready') statusClass = 'status-ready';
+                            if (order.STATUS === 'Collected') statusClass = 'status-delivered';
+                            if (order.STATUS === 'Cancelled' || order.STATUS === 'Not Picked Up') statusClass = 'status-cancelled';
+                            
+                            // Determine appropriate action button based on status
+                            let actionButton = '';
+                            if (order.STATUS === 'Pending') {
+                                actionButton = `<button class="action-btn btn-primary" onclick="updateOrderStatus(${order.ORDER_ID}, 'Preparing')">Process</button>`;
+                            } else if (order.STATUS === 'Preparing') {
+                                actionButton = `<button class="action-btn btn-primary" onclick="updateOrderStatus(${order.ORDER_ID}, 'Ready')">Ready</button>`;
+                            } else if (order.STATUS === 'Ready') {
+                                actionButton = `<button class="action-btn btn-primary" onclick="updateOrderStatus(${order.ORDER_ID}, 'Collected')">Complete</button>`;
+                            }
+                            
+                            row.innerHTML = `
+                                <td>#${order.ORDER_ID}</td>
+                                <td>${order.CUSTOMER_NAME}</td>
+                                <td>${formattedDate}</td>
+                                <td>${order.ITEM_COUNT}</td>
+                                <td>$${parseFloat(order.TOTAL_AMOUNT).toFixed(2)}</td>
+                                <td><span class="status-badge ${statusClass}">${order.STATUS}</span></td>
+                                <td>
+                                    ${actionButton}
+                                    <button class="action-btn" style="background-color: #6c757d; color: white;" onclick="viewOrderDetails(${order.ORDER_ID})">View</button>
+                                </td>
+                            `;
+                            
+                            tableBodyElement.appendChild(row);
+                        });
+                        
+                        tableElement.style.display = 'table';
+                    } else {
+                        console.error('Failed to load orders:', data.message);
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading orders:', error);
+                    loadingElement.style.display = 'none';
+                    errorElement.style.display = 'block';
+                    errorElement.querySelector('p').textContent = 'Failed to load orders: ' + error.message;
+                });
+        }
+        
+        // Update order status
+        function updateOrderStatus(orderId, newStatus) {
+            fetch(`/api/orders/status/${orderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload orders to show updated status
+                    loadRecentOrders();
+                } else {
+                    console.error('Failed to update order status:', data.message);
+                    alert('Failed to update order status: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating order status:', error);
+                alert('Error updating order status. Please try again later.');
+            });
+        }
+        
+        // View order details
+        function viewOrderDetails(orderId) {
+            // This could open a modal with order details
+            alert(`Viewing details for order #${orderId}`);
+            // In a real implementation, you'd fetch order details and display them in a modal
+        }
+        
+        // Load customer analysis data
+        function loadCustomerAnalysis() {
+            // Check if we have a canteen ID
+            if (!window.currentCanteenId) {
+                console.error('No canteen selected');
+                return;
+            }
+            
+            const loadingElement = document.getElementById('customer-analysis-loading');
+            const errorElement = document.getElementById('customer-analysis-error');
+            const contentElement = document.getElementById('customer-analysis-content');
+            
+            // Show loading
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            contentElement.style.display = 'none';
+            
+            // Fetch customer analysis from API
+            console.log(`Fetching customer analysis for canteen ID: ${window.currentCanteenId}`);
+            const url = `/api/orders/customer-analysis/${window.currentCanteenId}`;
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Customer analysis response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received customer analysis data:', data);
+                    loadingElement.style.display = 'none';
+                    
+                    if (data.success) {
+                        // Update summary stats
+                        document.getElementById('total-customers').textContent = data.summary.total_customers || 0;
+                        document.getElementById('active-customers').textContent = data.summary.active_customers || 0;
+                        document.getElementById('inactive-customers').textContent = data.summary.inactive_customers || 0;
+                        document.getElementById('active-percentage').textContent = (data.summary.active_percentage || 0) + '%';
+                        
+                        // Populate active customers table
+                        const activeTableBody = document.getElementById('active-customers-table');
+                        activeTableBody.innerHTML = '';
+                        
+                        data.active_customers.forEach(customer => {
+                            const row = document.createElement('tr');
+                            
+                            // Format dates
+                            const lastOrderDate = customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : 'Never';
+                            const registrationDate = customer.REGISTRATION_DATE ? new Date(customer.REGISTRATION_DATE).toLocaleDateString() : 'Unknown';
+                            
+                            row.innerHTML = `
+                                <td>${customer.USER_ID}</td>
+                                <td>${customer.NAME}</td>
+                                <td>${customer.EMAIL || customer.PHONE}</td>
+                                <td>${customer.order_count || 0}</td>
+                                <td>${lastOrderDate}</td>
+                                <td>${registrationDate}</td>
+                            `;
+                            
+                            activeTableBody.appendChild(row);
+                        });
+                        
+                        // Populate inactive customers table
+                        const inactiveTableBody = document.getElementById('inactive-customers-table');
+                        inactiveTableBody.innerHTML = '';
+                        
+                        data.inactive_customers.forEach(customer => {
+                            const row = document.createElement('tr');
+                            
+                            // Format dates
+                            const lastOrderDate = customer.last_order_date ? new Date(customer.last_order_date).toLocaleDateString() : 'Never';
+                            const registrationDate = customer.REGISTRATION_DATE ? new Date(customer.REGISTRATION_DATE).toLocaleDateString() : 'Unknown';
+                            
+                            row.innerHTML = `
+                                <td>${customer.USER_ID}</td>
+                                <td>${customer.NAME}</td>
+                                <td>${customer.EMAIL || customer.PHONE}</td>
+                                <td>${customer.order_count || 0}</td>
+                                <td>${lastOrderDate}</td>
+                                <td>${registrationDate}</td>
+                            `;
+                            
+                            inactiveTableBody.appendChild(row);
+                        });
+                        
+                        contentElement.style.display = 'block';
+                    } else {
+                        console.error('Failed to load customer analysis:', data.message);
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading customer analysis:', error);
+                    loadingElement.style.display = 'none';
+                    errorElement.style.display = 'block';
+                });
+        }
+        
+        // Generate and download customer report
+        function generateCustomerReport() {
+            // Check if we have a canteen ID
+            if (!window.currentCanteenId) {
+                console.error('No canteen selected');
+                return;
+            }
+            
+            const reportsLoading = document.getElementById('reports-loading');
+            const reportsError = document.getElementById('reports-error');
+            const reportsList = document.getElementById('reports-list');
+            
+            // Show loading
+            reportsLoading.style.display = 'block';
+            reportsError.style.display = 'none';
+            reportsList.style.display = 'none';
+            
+            // Fetch report data from API
+            fetch(`/api/orders/customer-report/${window.currentCanteenId}`)
+                .then(response => response.json())
+                .then(data => {
+                    reportsLoading.style.display = 'none';
+                    reportsList.style.display = 'block';
+                    
+                    if (data.success) {
+                        // Generate CSV content
+                        const report = data.report;
+                        let csvContent = "data:text/csv;charset=utf-8,";
+                        
+                        // Add report header
+                        csvContent += `${report.title}\r\n`;
+                        csvContent += `Generated on: ${report.generated_on}\r\n\r\n`;
+                        csvContent += `Summary Statistics:\r\n`;
+                        csvContent += `Total Customers,${report.summary.total_customers}\r\n`;
+                        csvContent += `Active Customers,${report.summary.active_customers}\r\n`;
+                        csvContent += `Inactive Customers,${report.summary.inactive_customers}\r\n`;
+                        csvContent += `Active Percentage,${report.summary.active_percentage}%\r\n\r\n`;
+                        
+                        // Add column headers
+                        csvContent += "User ID,Name,Email,Phone,Status,Total Orders,Total Spent,Last Order Date,Registration Date\r\n";
+                        
+                        // Add customer data
+                        report.customers.forEach(customer => {
+                            csvContent += `${customer.USER_ID},`;
+                            csvContent += `"${customer.NAME}",`;
+                            csvContent += `"${customer.EMAIL || ''}",`;
+                            csvContent += `"${customer.PHONE || ''}",`;
+                            csvContent += `${customer.status},`;
+                            csvContent += `${customer.total_orders},`;
+                            csvContent += `"${customer.total_spent}",`;
+                            csvContent += `"${customer.last_order_date}",`;
+                            csvContent += `"${customer.REGISTRATION_DATE}"\r\n`;
+                        });
+                        
+                        // Create download link
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `${report.title.replace(/ /g, '_')}_${report.generated_on.replace(/\//g, '-')}.csv`);
+                        document.body.appendChild(link);
+                        
+                        // Trigger download
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        console.error('Failed to generate report:', data.message);
+                        reportsError.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error generating report:', error);
+                    reportsLoading.style.display = 'none';
+                    reportsError.style.display = 'block';
+                });
+        }
+        
+        // Placeholder functions for other reports
+        function generateSalesReport() {
+            alert('Sales report generation will be implemented in a future update.');
+        }
+        
+        function generateInventoryReport() {
+            alert('Inventory report generation will be implemented in a future update.');
+        }
+        
+        function hideAllContentSections() {
+            const contentSections = document.querySelectorAll('.content-section');
+            contentSections.forEach(section => {
+                section.style.display = 'none';
+            });
+        }
+        
+        // Function to update the authentication code when a canteen is selected in the dashboard
+        function updateDashboardAuthCode() {
+            const canteenSelect = document.getElementById('dashboard-canteen-select');
+            const authCodeSection = document.getElementById('dashboard-auth-code-section');
+            const authCodeDisplay = document.getElementById('dashboard-auth-code-display');
+            const authCodeError = document.getElementById('dashboard-auth-code-error');
+            
+            // Hide error message if it was shown
+            if (authCodeError) {
+                authCodeError.style.display = 'none';
+            }
+            
+            if (canteenSelect.value) {
+                // Show the authentication code section
+                authCodeSection.style.display = 'block';
+                
+                // Display the authentication code
+                const authCode = canteenAuthCodes[canteenSelect.value];
+                authCodeDisplay.textContent = authCode;
+            } else {
+                // Hide the authentication code section
+                authCodeSection.style.display = 'none';
+            }
+        }
+        
+        // Function to authenticate the canteen from the dashboard
+        function authenticateDashboardCanteen() {
+            const canteenSelect = document.getElementById('dashboard-canteen-select');
+            const authCodeInput = document.getElementById('dashboard-auth-code-input');
+            const authCodeError = document.getElementById('dashboard-auth-code-error');
+            
+            if (!canteenSelect.value) {
+                alert('Please select a canteen');
+                return;
+            }
+            
+            const expectedCode = canteenAuthCodes[canteenSelect.value];
+            const enteredCode = authCodeInput.value.trim();
+            
+            if (enteredCode === expectedCode) {
+                // Authentication successful
+                window.currentCanteenId = canteenSelect.value;
+                
+                // Update the admin title with the canteen name
+                const canteenName = getCanteenName(canteenSelect.value);
+                updateAdminTitle(canteenName);
+                
+                // Show the dashboard
+                showDashboard();
+                
+                // Update active menu item
+                document.querySelector('.admin-menu a.active').classList.remove('active');
+                document.querySelector('.admin-menu a[onclick="showDashboard()"]').classList.add('active');
+            } else {
+                // Authentication failed
+                authCodeError.style.display = 'block';
+            }
+        }
+        
+        // Logout functionality
+        // Function to handle logout
+        function logout() {
+            // Clear canteen authentication
+            localStorage.removeItem('canteenAuthenticated');
+            localStorage.removeItem('authenticatedCanteenId');
+            
+            // Use the logout function from auth-handler.js
+            if (window.authHandler && window.authHandler.logout) {
+                window.authHandler.logout();
+            } else {
+                // Fallback if auth-handler.js is not loaded
+                localStorage.removeItem('canteenUserData');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Canteen Authentication Code
+        // Generate a random authentication code for each canteen
+        const canteenAuthCodes = {
+            '1': 'BM' + Math.floor(1000 + Math.random() * 9000), // BIG MINGOES
+            '2': 'MM' + Math.floor(1000 + Math.random() * 9000), // MINI MINGOES
+            '3': 'MF' + Math.floor(1000 + Math.random() * 9000)  // M M FOODS
+        };
+        
+        // Always show the welcome section first, requiring authentication each time
+        document.getElementById('adminWelcomeSection').style.display = 'block';
+        document.getElementById('adminDashboardSection').style.display = 'none';
+        
+        // Clear any previous authentication
+        localStorage.removeItem('canteenAuthenticated');
+        localStorage.removeItem('authenticatedCanteenId');
+        
+        // Function to update the authentication code when a canteen is selected
+        function updateAuthCode() {
+            const canteenSelect = document.getElementById('canteen-select');
+            const authCodeSection = document.getElementById('auth-code-section');
+            const authCodeDisplay = document.getElementById('auth-code-display');
+            const authCodeError = document.getElementById('auth-code-error');
+            
+            // Hide error message if it was shown
+            if (authCodeError) {
+                authCodeError.style.display = 'none';
+            }
+            
+            if (canteenSelect.value) {
+                // Show the authentication code section
+                authCodeSection.style.display = 'block';
+                
+                // Display the authentication code
+                const authCode = canteenAuthCodes[canteenSelect.value];
+                authCodeDisplay.textContent = authCode;
+            } else {
+                // Hide the authentication code section
+                authCodeSection.style.display = 'none';
+            }
+        }
+        
+        // Function to authenticate the canteen
+        function authenticateCanteen() {
+            const canteenSelect = document.getElementById('canteen-select');
+            const authCodeInput = document.getElementById('auth-code-input');
+            const authCodeError = document.getElementById('auth-code-error');
+            
+            if (!canteenSelect.value) {
+                alert('Please select a canteen');
+                return;
+            }
+            
+            const expectedCode = canteenAuthCodes[canteenSelect.value];
+            const enteredCode = authCodeInput.value.trim();
+            
+            if (enteredCode === expectedCode) {
+                // Authentication successful - using session variables instead of localStorage
+                // This ensures authentication is required each time they log in
+                window.currentCanteenId = canteenSelect.value;
+                
+                // Hide the welcome section and show the dashboard
+                document.getElementById('adminWelcomeSection').style.display = 'none';
+                document.getElementById('adminDashboardSection').style.display = 'block';
+                
+                // Update the admin title with the canteen name
+                const canteenName = getCanteenName(canteenSelect.value);
+                updateAdminTitle(canteenName);
+                
+                // Load dashboard data
+                loadDashboardStats();
+                loadRecentOrders();
+            } else {
+                // Authentication failed
+                authCodeError.style.display = 'block';
+            }
+        }
+        
+        // Function to get the canteen name from the canteen ID
+        
+        // Menu Items Management Functions
+        let menuItems = [];
+        let editingMenuItemId = null;
+        
+        // Function to load menu items for the current canteen
+        function loadMenuItems() {
+            const menuItemsLoading = document.getElementById('menuItemsLoading');
+            const menuItemsError = document.getElementById('menuItemsError');
+            const menuItemsEmpty = document.getElementById('menuItemsEmpty');
+            const menuItemsTable = document.getElementById('menuItemsTable');
+            
+            // Show loading state
+            menuItemsLoading.style.display = 'block';
+            menuItemsError.style.display = 'none';
+            menuItemsEmpty.style.display = 'none';
+            menuItemsTable.style.display = 'none';
+            
+            // Fetch menu items for the current canteen
+            fetch(`/api/menu/items?canteenId=${window.currentCanteenId}`)
+                .then(response => response.json())
+                .then(data => {
+                    menuItemsLoading.style.display = 'none';
+                    
+                    if (data.success) {
+                        menuItems = data.menuItems || [];
+                        
+                        if (menuItems.length === 0) {
+                            menuItemsEmpty.style.display = 'block';
+                        } else {
+                            renderMenuItemsTable();
+                            menuItemsTable.style.display = 'table';
+                        }
+                    } else {
+                        menuItemsError.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading menu items:', error);
+                    menuItemsLoading.style.display = 'none';
+                    menuItemsError.style.display = 'block';
+                });
+        }
+        
+        // Function to render menu items table
+        function renderMenuItemsTable() {
+            const tableBody = document.getElementById('menuItemsTableBody');
+            tableBody.innerHTML = '';
+            
+            menuItems.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Image cell
+                const imageCell = document.createElement('td');
+                const image = document.createElement('img');
+                image.src = item.IMAGE_URL || 'https://via.placeholder.com/50?text=No+Image';
+                image.alt = item.ITEM_NAME;
+                image.style.width = '50px';
+                image.style.height = '50px';
+                image.style.objectFit = 'cover';
+                image.style.borderRadius = '5px';
+                imageCell.appendChild(image);
+                
+                // Name cell
+                const nameCell = document.createElement('td');
+                nameCell.textContent = item.ITEM_NAME;
+                
+                // Category cell
+                const categoryCell = document.createElement('td');
+                categoryCell.textContent = item.CATEGORY;
+                
+                // Price cell
+                const priceCell = document.createElement('td');
+                priceCell.textContent = `₹${parseFloat(item.PRICE).toFixed(2)}`;
+                
+                // Available cell
+                const availableCell = document.createElement('td');
+                const availableBadge = document.createElement('span');
+                availableBadge.style.padding = '5px 10px';
+                availableBadge.style.borderRadius = '20px';
+                availableBadge.style.fontSize = '0.8rem';
+                availableBadge.style.fontWeight = '500';
+                
+                if (item.AVAILABLE) {
+                    availableBadge.textContent = 'Available';
+                    availableBadge.style.backgroundColor = '#d4edda';
+                    availableBadge.style.color = '#155724';
+                } else {
+                    availableBadge.textContent = 'Not Available';
+                    availableBadge.style.backgroundColor = '#f8d7da';
+                    availableBadge.style.color = '#721c24';
+                }
+                
+                availableCell.appendChild(availableBadge);
+                
+                // Actions cell
+                const actionsCell = document.createElement('td');
+                
+                // Edit button
+                const editButton = document.createElement('button');
+                editButton.className = 'action-btn';
+                editButton.style.backgroundColor = '#ffc107';
+                editButton.style.color = '#212529';
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.title = 'Edit';
+                editButton.onclick = () => editMenuItem(item.ITEM_ID);
+                
+                // Delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'action-btn';
+                deleteButton.style.backgroundColor = '#dc3545';
+                deleteButton.style.color = 'white';
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.title = 'Delete';
+                deleteButton.onclick = () => deleteMenuItem(item.ITEM_ID);
+                
+                actionsCell.appendChild(editButton);
+                actionsCell.appendChild(deleteButton);
+                
+                // Append all cells to the row
+                row.appendChild(imageCell);
+                row.appendChild(nameCell);
+                row.appendChild(categoryCell);
+                row.appendChild(priceCell);
+                row.appendChild(availableCell);
+                row.appendChild(actionsCell);
+                
+                // Append the row to the table body
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Function to show the add menu item form
+        function showAddMenuItemForm() {
+            // Reset the form
+            document.getElementById('menuItemForm').reset();
+            document.getElementById('menuItemId').value = '';
+            document.getElementById('menuItemFormTitle').textContent = 'Add New Menu Item';
+            document.getElementById('currentImageContainer').style.display = 'none';
+            document.getElementById('menuItemImagePreview').style.display = 'none';
+            
+            // Set default image source to existing
+            document.getElementById('menuItemImageType').value = 'existing';
+            toggleImageSourceType();
+            
+            // Show the form container
+            document.getElementById('menuItemFormContainer').style.display = 'block';
+            
+            // Hide the menu items table container
+            document.getElementById('menuItemsTableContainer').style.display = 'none';
+            
+            // Reset the editing state
+            editingMenuItemId = null;
+        }
+        
+        // Function to show the edit menu item form
+        function editMenuItem(itemId) {
+            // Find the menu item
+            const menuItem = menuItems.find(item => item.ITEM_ID === itemId);
+            
+            if (!menuItem) {
+                alert('Menu item not found');
+                return;
+            }
+            
+            // Set the form title
+            document.getElementById('menuItemFormTitle').textContent = 'Edit Menu Item';
+            
+            // Populate the form
+            document.getElementById('menuItemId').value = menuItem.ITEM_ID;
+            document.getElementById('menuItemName').value = menuItem.ITEM_NAME;
+            document.getElementById('menuItemCategory').value = menuItem.CATEGORY;
+            document.getElementById('menuItemPrice').value = menuItem.PRICE;
+            document.getElementById('menuItemDescription').value = menuItem.DESCRIPTION || '';
+            
+            // Set availability
+            const availableRadios = document.getElementsByName('menuItemAvailable');
+            for (let i = 0; i < availableRadios.length; i++) {
+                if (availableRadios[i].value === String(menuItem.AVAILABLE)) {
+                    availableRadios[i].checked = true;
+                    break;
+                }
+            }
+            
+            // Handle image display and selection
+            if (menuItem.IMAGE_URL) {
+                // If it's an image from the images/food directory
+                if (menuItem.IMAGE_URL.startsWith('images/food/')) {
+                    // Set the image type to existing
+                    document.getElementById('menuItemImageType').value = 'existing';
+                    toggleImageSourceType();
+                    
+                    // Select the correct option in the dropdown
+                    document.getElementById('menuItemExistingImage').value = menuItem.IMAGE_URL;
+                    
+                    // Show the preview
+                    document.getElementById('previewImage').src = menuItem.IMAGE_URL;
+                    document.getElementById('menuItemImagePreview').style.display = 'block';
+                } 
+                // If it's an uploaded image
+                else {
+                    // Show current image
+                    document.getElementById('currentMenuItemImage').src = menuItem.IMAGE_URL;
+                    document.getElementById('currentImageContainer').style.display = 'block';
+                    
+                    // Set the image type to upload
+                    document.getElementById('menuItemImageType').value = 'upload';
+                    toggleImageSourceType();
+                }
+            } else {
+                // No image, hide containers
+                document.getElementById('currentImageContainer').style.display = 'none';
+                document.getElementById('menuItemImagePreview').style.display = 'none';
+                
+                // Default to existing image selection
+                document.getElementById('menuItemImageType').value = 'existing';
+                toggleImageSourceType();
+            }
+            
+            // Show the form container
+            document.getElementById('menuItemFormContainer').style.display = 'block';
+            
+            // Hide the menu items table container
+            document.getElementById('menuItemsTableContainer').style.display = 'none';
+            
+            // Set the editing state
+            editingMenuItemId = menuItem.ITEM_ID;
+        }
+        
+        // Function to hide the menu item form
+        function hideMenuItemForm() {
+            document.getElementById('menuItemFormContainer').style.display = 'none';
+            document.getElementById('menuItemsTableContainer').style.display = 'block';
+        }
+        
+        // Function to toggle between existing image and upload new image
+        function toggleImageSourceType() {
+            const imageType = document.getElementById('menuItemImageType').value;
+            const existingImageContainer = document.getElementById('existingImageContainer');
+            const uploadImageContainer = document.getElementById('uploadImageContainer');
+            
+            if (imageType === 'existing') {
+                existingImageContainer.style.display = 'block';
+                uploadImageContainer.style.display = 'none';
+                // Clear upload input
+                document.getElementById('menuItemImage').value = '';
+            } else {
+                existingImageContainer.style.display = 'none';
+                uploadImageContainer.style.display = 'block';
+                // Clear existing image selection
+                document.getElementById('menuItemExistingImage').value = '';
+            }
+            
+            // Hide preview when switching
+            document.getElementById('menuItemImagePreview').style.display = 'none';
+        }
+        
+        // Function to preview existing image
+        function previewExistingImage() {
+            const selectedImage = document.getElementById('menuItemExistingImage').value;
+            const previewContainer = document.getElementById('menuItemImagePreview');
+            const previewImage = document.getElementById('previewImage');
+            
+            if (selectedImage) {
+                previewImage.src = selectedImage;
+                previewContainer.style.display = 'block';
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+        
+        // Function to handle image preview
+        function handleImagePreview() {
+            const fileInput = document.getElementById('menuItemImage');
+            const previewContainer = document.getElementById('menuItemImagePreview');
+            const previewImage = document.getElementById('previewImage');
+            
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files && fileInput.files[0]) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    }
+                    
+                    reader.readAsDataURL(fileInput.files[0]);
+                }
+            });
+        }
+        
+        // Function to clear image preview
+        function clearImagePreview() {
+            const imageType = document.getElementById('menuItemImageType').value;
+            
+            if (imageType === 'existing') {
+                document.getElementById('menuItemExistingImage').value = '';
+            } else {
+                document.getElementById('menuItemImage').value = '';
+            }
+            
+            document.getElementById('menuItemImagePreview').style.display = 'none';
+        }
+        
+        // Function to delete a menu item
+        function deleteMenuItem(itemId) {
+            if (confirm('Are you sure you want to delete this menu item? This action cannot be undone.')) {
+                fetch(`/api/menu/items/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Menu item deleted successfully');
+                        loadMenuItems(); // Reload the menu items
+                    } else {
+                        alert(data.message || 'Failed to delete menu item');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting menu item:', error);
+                    alert('An error occurred while deleting the menu item');
+                });
+            }
+        }
+        
+        // Function to handle menu item form submission
+        function handleMenuItemFormSubmit() {
+            const menuItemForm = document.getElementById('menuItemForm');
+            
+            menuItemForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Get form data
+                const itemId = document.getElementById('menuItemId').value;
+                const name = document.getElementById('menuItemName').value;
+                const category = document.getElementById('menuItemCategory').value;
+                const price = document.getElementById('menuItemPrice').value;
+                const description = document.getElementById('menuItemDescription').value;
+                const available = document.querySelector('input[name="menuItemAvailable"]:checked').value === 'true';
+                const imageType = document.getElementById('menuItemImageType').value;
+                
+                // Create form data object for form submission
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('category', category);
+                formData.append('price', price);
+                formData.append('description', description);
+                formData.append('available', available);
+                formData.append('canteenId', window.currentCanteenId);
+                
+                // Handle image based on selected source type
+                if (imageType === 'existing') {
+                    const selectedImage = document.getElementById('menuItemExistingImage').value;
+                    if (selectedImage) {
+                        formData.append('existingImagePath', selectedImage);
+                    }
+                } else {
+                    const imageFile = document.getElementById('menuItemImage').files[0];
+                    if (imageFile) {
+                        formData.append('image', imageFile);
+                    }
+                }
+                
+                // Determine if we're adding or updating
+                const isUpdate = !!itemId;
+                const url = isUpdate ? `/api/menu/items/${itemId}` : '/api/menu/items';
+                const method = isUpdate ? 'PUT' : 'POST';
+                
+                // Send the request
+                fetch(url, {
+                    method: method,
+                    body: formData,
+                    // Don't set Content-Type header - browser will set it with boundary for FormData
+                    headers: {
+                        // Intentionally empty to let browser handle multipart/form-data with boundary
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(isUpdate ? 'Menu item updated successfully' : 'Menu item added successfully');
+                        hideMenuItemForm();
+                        loadMenuItems(); // Reload the menu items
+                    } else {
+                        alert(data.message || 'Failed to save menu item');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving menu item:', error);
+                    alert('An error occurred while saving the menu item');
+                });
+            });
+        }
+        
+        // Initialize menu items management when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up image preview handler
+            handleImagePreview();
+            
+            // Set up form submission handler
+            handleMenuItemFormSubmit();
+            
+            // Load menu items when the menu items section is shown
+            document.getElementById('menuItemsContent').addEventListener('show', function() {
+                loadMenuItems();
+            });
+        });
+        function getCanteenName(canteenId) {
+            const canteenNames = {
+                '1': 'BIG MINGOES',
+                '2': 'MINI MINGOES',
+                '3': 'M M FOODS'
+            };
+            
+            return canteenNames[canteenId] || 'Unknown Canteen';
+        }
+        
+        // Function to update the admin title with the canteen name
+        function updateAdminTitle(canteenName) {
+            const adminTitle = document.getElementById('canteenDashboardTitle');
+            const adminSubtitle = document.getElementById('canteenDashboardSubtitle');
+            const currentCanteenName = document.getElementById('current-canteen-name');
+            const sidebarCanteenName = document.getElementById('sidebar-canteen-name');
+            
+            if (adminTitle) {
+                adminTitle.textContent = canteenName + ' Admin Dashboard';
+            }
+            
+            if (adminSubtitle) {
+                adminSubtitle.textContent = 'Welcome back! Here\'s what\'s happening with ' + canteenName + ' today.';
+            }
+            
+            // Update the canteen name in the navbar indicator
+            if (currentCanteenName) {
+                currentCanteenName.textContent = canteenName;
+            }
+            
+            // Update the canteen name in the sidebar badge
+            if (sidebarCanteenName) {
+                sidebarCanteenName.textContent = canteenName;
+            }
+        }
+        
+        // Function to clear canteen authentication and go back to welcome screen
+        function clearCanteenAuth() {
+            // Clear the session variable
+            window.currentCanteenId = null;
+            
+            // Hide the dashboard and show the welcome section
+            document.getElementById('adminDashboardSection').style.display = 'none';
+            document.getElementById('adminWelcomeSection').style.display = 'block';
+            
+            // Reset the canteen indicators
+            const currentCanteenName = document.getElementById('current-canteen-name');
+            if (currentCanteenName) {
+                currentCanteenName.textContent = 'Not Authenticated';
+            }
+            
+            const sidebarCanteenName = document.getElementById('sidebar-canteen-name');
+            if (sidebarCanteenName) {
+                sidebarCanteenName.textContent = 'Not Selected';
+            }
+            
+            // Reset the canteen select and auth code section
+            const canteenSelect = document.getElementById('canteen-select');
+            if (canteenSelect) {
+                canteenSelect.value = '';
+            }
+            
+            const authCodeSection = document.getElementById('auth-code-section');
+            if (authCodeSection) {
+                authCodeSection.style.display = 'none';
+            }
+            
+            const authCodeInput = document.getElementById('auth-code-input');
+            if (authCodeInput) {
+                authCodeInput.value = '';
+            }
+            
+            const authCodeError = document.getElementById('auth-code-error');
+            if (authCodeError) {
+                authCodeError.style.display = 'none';
+       1     }
+            
+            // Generate new auth codes for security
+            Object.keys(canteenAuthCodes).forEach(key => {
+                const prefix = key === '1' ? 'BM' : (key === '2' ? 'MM' : 'MF');
+                canteenAuthCodes[key] = prefix + Math.floor(1000 + Math.random() * 9000);
+            });
+        }
+    </script>
+</body>
+</html>
