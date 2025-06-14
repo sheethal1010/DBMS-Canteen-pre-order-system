@@ -1,0 +1,9 @@
+{
+    "zencoder.enableRepoIndexing": true,
+    "json.schemas": [
+        {
+            "fileMatch": ["package.json"],
+            "url": "https://schemastore.azurewebsites.net/schemas/json/package.json"
+        }
+    ]
+}
