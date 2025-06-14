@@ -1,0 +1,100 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables and configuration
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Uploaded files (you might want to keep some sample images)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*_backup.*
+backup/
+backup-*/
+
+# Test files (if you want to exclude them)
+*test*.js
+*debug*.js
+create-test-user.js
+check-db.js
+add-user.js
+list-users.js
+show-users.js
+find-users-tables.js
+update-password.js
+remove-duplicates.js
+setup-images-table.js
+add-customer-name*.js
+add-unique-constraints.js
+view-users.html
+cleanup.ps1
+db-server.js
+
+# Build directories
+build/
+dist/
